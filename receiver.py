@@ -17,4 +17,4 @@ def print_received_data():
 threading.Thread(target=print_received_data, daemon=True).start()
 
 with LoRaHatDriver(config) as lora_hat:
-    lora_hat.receive()
+    lora_hat.receive(q)
