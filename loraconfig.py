@@ -16,3 +16,11 @@ default = {
     "WOR_period": 500,
     "key": 0,
 }
+
+config = default.copy()
+try:
+    import localconfig
+
+    config.update(localconfig.config)
+except ImportError:
+    pass
