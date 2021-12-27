@@ -111,7 +111,7 @@ class LoRaHatDriver:
         assert len(address_str) == 16
         return int(address_str[8:], 2)
 
-    def get_reg_02H(net_id=0):
+    def get_reg_02H(self, net_id=0):
         """Network ID, it is used to distinguish network.
 
         If you want to communicating between two modules, you need to set their NETID to same ID"""
@@ -123,7 +123,7 @@ class LoRaHatDriver:
                 f"net_id must be an int between 0 and 256, but was {net_id}."
             )
 
-    def get_reg_03H(baud_rate=9600, parity_bit="8N1", air_speed="2.4K"):
+    def get_reg_03H(self, baud_rate=9600, parity_bit="8N1", air_speed="2.4K"):
         """baud rate(7-5), parity bit(4-3), wireless air speed / bps (2-0)"""
 
         baud_rate_dict = {
@@ -175,7 +175,9 @@ class LoRaHatDriver:
 
         return int(baud_rate_str + parity_bit_str + air_speed_str, 2)
 
-    def get_reg_04H(packet_len=240, enable_ambient_noise=False, transmit_power="22dBm"):
+    def get_reg_04H(
+        self, packet_len=240, enable_ambient_noise=False, transmit_power="22dBm"
+    ):
         packet_len_dict = {
             240: "00",
             128: "01",
@@ -211,7 +213,7 @@ class LoRaHatDriver:
 
         return int(packet_len_str + ambient_noise_str + transmit_power_str, 2)
 
-    def get_reg_05H(channel=18):  # 18 default for SX1262, 23 default for SX1268
+    def get_reg_05H(self, channel=18):  # 18 default for SX1262, 23 default for SX1268
         """
         Channel control (CH) 0-83. 84 channels in total
 
@@ -226,6 +228,7 @@ class LoRaHatDriver:
             )
 
     def get_reg_06H(
+        self,
         enable_RSSI_byte=False,
         enable_transmitting_mode=False,
         enable_relay_function=False,
@@ -300,7 +303,7 @@ class LoRaHatDriver:
             2,
         )
 
-    def get_reg_07H(key=0):
+    def get_reg_07H(self, key=0):
         """High bytes of Key (default 0)
 
         Only write enable, the read result always be 0;
@@ -313,7 +316,7 @@ class LoRaHatDriver:
         assert len(key_str) == 16
         return int(key_str[:8], 2)
 
-    def get_reg_08H(key=0):
+    def get_reg_08H(self, key=0):
         """Low bytes of Key (default 0)
 
         Only write enable, the read result always be 0;
@@ -337,12 +340,21 @@ class LoRaHatDriver:
         cfg_bytes[3] = self.get_reg_00H(self.module_address)
         cfg_bytes[4] = self.get_reg_01H(self.module_address)
         cfg_bytes[5] = self.get_reg_02H(self.net_id)
-        cfg_bytes[6] = self.get_reg_03H()
-        cfg_bytes[7] = self.get_reg_04H()
-        cfg_bytes[8] = self.get_reg_05H()
-        cfg_bytes[9] = self.get_reg_06H()
-        cfg_bytes[10] = self.get_reg_07H()
-        cfg_bytes[11] = self.get_reg_08H()
+        cfg_bytes[6] = self.get_reg_03H(self.baud_rate, self.parity_bit, self.air_speed)
+        cfg_bytes[7] = self.get_reg_04H(
+            self.packet_len, self.enable_ambient_noise, self.transmit_power
+        )
+        cfg_bytes[8] = self.get_reg_05H(self.channel)
+        cfg_bytes[9] = self.get_reg_06H(
+            self.enable_RSSI_byte,
+            self.enable_transmitting_mode,
+            self.enable_relay_function,
+            self.enable_LBT,
+            self.WOR_mode,
+            self.WOR_period,
+        )
+        cfg_bytes[10] = self.get_reg_07H(self.key)
+        cfg_bytes[11] = self.get_reg_08H(self.key)
 
         ret_bytes = cfg_bytes.copy()
         ret_bytes[0] = self.RET_HEADER[0]
