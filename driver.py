@@ -389,6 +389,7 @@ class LoRaHatDriver:
                     print("Could not apply configuration. Aborting.")
                     break
                 else:
+                    time.sleep(0.1)
                     wait_counter += 1
 
     def send(self, message):
