@@ -18,6 +18,9 @@ default = {
 }
 
 config = default.copy()
+config["enable_transmitting_mode"] = True
+
+
 try:
     import localconfig
 

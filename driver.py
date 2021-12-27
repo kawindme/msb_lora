@@ -79,6 +79,10 @@ class LoRaHatDriver:
         self.WOR_period = config["WOR_period"]
         self.key = config["key"]
 
+        if self.enable_transmitting_mode:
+            # assert "target_address" in config
+            self.target_address = config["target_address"]
+
         GPIO.setmode(GPIO.BCM)  # https://raspberrypi.stackexchange.com/a/12967
         GPIO.setwarnings(False)  # suppress channel already in use warning
         GPIO.setup(self.M0, GPIO.OUT)
@@ -98,7 +102,8 @@ class LoRaHatDriver:
         GPIO.cleanup()
         print("Successfully shut down.")
 
-    def get_reg_00H(self, module_address=0):
+    @staticmethod
+    def get_reg_00H(module_address=0):
         """High bits of module address. Note that when module address is 0xFFFF (=65535).
 
         It works as broadcasting and listening address and LoRa module doesn't filter address anymore.
@@ -109,7 +114,8 @@ class LoRaHatDriver:
         assert len(address_str) == 16
         return int(address_str[:8], 2)
 
-    def get_reg_01H(self, module_address=0):
+    @staticmethod
+    def get_reg_01H(module_address=0):
         """Low bits of module address. Note that when module address is 0xFFFF (=65535).
 
         It works as broadcasting and listening address and LoRa module doesn't filter address anymore
@@ -120,7 +126,8 @@ class LoRaHatDriver:
         assert len(address_str) == 16
         return int(address_str[8:], 2)
 
-    def get_reg_02H(self, net_id=0):
+    @staticmethod
+    def get_reg_02H(net_id=0):
         """Network ID, it is used to distinguish network.
 
         If you want to communicating between two modules, you need to set their NETID to same ID"""
@@ -132,7 +139,8 @@ class LoRaHatDriver:
                 f"net_id must be an int between 0 and 256, but was {net_id}."
             )
 
-    def get_reg_03H(self, baud_rate=9600, parity_bit="8N1", air_speed="2.4K"):
+    @staticmethod
+    def get_reg_03H(baud_rate=9600, parity_bit="8N1", air_speed="2.4K"):
         """baud rate(7-5), parity bit(4-3), wireless air speed / bps (2-0)"""
 
         baud_rate_dict = {
@@ -184,9 +192,8 @@ class LoRaHatDriver:
 
         return int(baud_rate_str + parity_bit_str + air_speed_str, 2)
 
-    def get_reg_04H(
-        self, packet_len=240, enable_ambient_noise=False, transmit_power="22dBm"
-    ):
+    @staticmethod
+    def get_reg_04H(packet_len=240, enable_ambient_noise=False, transmit_power="22dBm"):
         packet_len_dict = {
             240: "00",
             128: "01",
@@ -222,7 +229,8 @@ class LoRaHatDriver:
 
         return int(packet_len_str + ambient_noise_str + transmit_power_str, 2)
 
-    def get_reg_05H(self, channel=18):  # 18 default for SX1262, 23 default for SX1268
+    @staticmethod
+    def get_reg_05H(channel=18):  # 18 default for SX1262, 23 default for SX1268
         """
         Channel control (CH) 0-83. 84 channels in total
 
@@ -236,8 +244,8 @@ class LoRaHatDriver:
                 f"Invalid channel, channel must be between 0-83, but was {channel}."
             )
 
+    @staticmethod
     def get_reg_06H(
-        self,
         enable_RSSI_byte=False,
         enable_transmitting_mode=False,
         enable_relay_function=False,
@@ -312,7 +320,8 @@ class LoRaHatDriver:
             2,
         )
 
-    def get_reg_07H(self, key=0):
+    @staticmethod
+    def get_reg_07H(key=0):
         """High bytes of Key (default 0)
 
         Only write enable, the read result always be 0;
@@ -325,7 +334,8 @@ class LoRaHatDriver:
         assert len(key_str) == 16
         return int(key_str[:8], 2)
 
-    def get_reg_08H(self, key=0):
+    @staticmethod
+    def get_reg_08H(key=0):
         """Low bytes of Key (default 0)
 
         Only write enable, the read result always be 0;
@@ -404,7 +414,20 @@ class LoRaHatDriver:
     def send(self, message):
         # message = message + "\r\n"
         message = message + "\n"
-        self.ser.write(message.encode("ascii"))
+        bin_message = message.encode("ascii")
+        if (
+            self.enable_transmitting_mode
+        ):  # point to point -> requires prepended target address
+            # When point to point transmitting, module will recognize the
+            # first three byte as Address High + Address Low + Channel. and wireless transmit it
+            address_header = bytearray(3)
+            address_header[0] = self.get_reg_00H(self.target_address)
+            address_header[1] = self.get_reg_01H(self.target_address)
+            address_header[2] = self.get_reg_05H(self.channel)
+
+            bin_message = bytes(address_header) + bin_message
+
+        self.ser.write(bin_message)
 
     def receive(self, q):
         while True:
