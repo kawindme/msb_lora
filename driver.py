@@ -89,6 +89,15 @@ class LoRaHatDriver:
         self.ser.port = "/dev/ttyS0"
         self.ser.baudrate = self.baud_rate
 
+    def __enter__(self):
+        self.apply_config()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.ser.close()
+        GPIO.cleanup()
+        print("Successfully shut down.")
+
     def get_reg_00H(self, module_address=0):
         """High bits of module address. Note that when module address is 0xFFFF (=65535).
 

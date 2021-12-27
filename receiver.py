@@ -3,6 +3,5 @@ from driver import LoRaHatDriver
 
 config = loraconfig.default.copy()
 
-lora_hat = LoRaHatDriver(config)
-lora_hat.apply_config()
-lora_hat.receive()
+with LoRaHatDriver(config) as lora_hat:
+    lora_hat.receive()  # TODO write to file?
