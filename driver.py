@@ -80,7 +80,7 @@ class LoRaHatDriver:
         self.key = config["key"]
 
         GPIO.setmode(GPIO.BCM)  # https://raspberrypi.stackexchange.com/a/12967
-        # GPIO.setwarnings(False)
+        GPIO.setwarnings(False)  # suppress channel already in use warning
         GPIO.setup(self.M0, GPIO.OUT)
         GPIO.setup(self.M1, GPIO.OUT)
 
@@ -371,14 +371,14 @@ class LoRaHatDriver:
         self.ser.reset_input_buffer()
         print("Press \033[1;32mCtrl+C\033[0m to exit")
 
-        if self.ser.is_open():
+        if self.ser.is_open:
             print("Serial port is open, trying to write configuration.")
             self.ser.write(cfg_bytes)
             wait_counter = 0
             while True:
-                if self.ser.in_waiting() > 0:  # there is something to read
+                if self.ser.in_waiting > 0:  # there is something to read
                     time.sleep(0.1)
-                    read_buffer = self.ser.read(self.ser.in_waiting())
+                    read_buffer = self.ser.read(self.ser.in_waiting)
                     if read_buffer == ret_bytes:
                         print("Successfully applied configuration.")
                         # enter operation mode
@@ -397,9 +397,9 @@ class LoRaHatDriver:
 
     def receive(self):
         while True:
-            if self.ser.in_waiting() > 0:  # there is something to read
+            if self.ser.in_waiting > 0:  # there is something to read
                 time.sleep(0.1)
-                read_buffer = self.ser.read(self.ser.in_waiting())
+                read_buffer = self.ser.read(self.ser.in_waiting)
                 if read_buffer != "":
                     print("received a message:")
                     print(read_buffer)
