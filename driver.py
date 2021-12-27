@@ -84,7 +84,7 @@ class LoRaHatDriver:
         GPIO.setup(self.M0, GPIO.OUT)
         GPIO.setup(self.M1, GPIO.OUT)
 
-        # create object but do not open file yet
+        # create serial object but do not open file yet
         self.ser = serial.Serial()
         self.ser.port = "/dev/ttyS0"
         self.ser.baudrate = self.baud_rate
@@ -101,7 +101,7 @@ class LoRaHatDriver:
     def get_reg_00H(self, module_address=0):
         """High bits of module address. Note that when module address is 0xFFFF (=65535).
 
-        It works as broadcasting and listening address and LoRa module doesn't filter address anymore
+        It works as broadcasting and listening address and LoRa module doesn't filter address anymore.
         """
 
         assert 0 <= module_address < 2 ** 16
@@ -402,18 +402,16 @@ class LoRaHatDriver:
                     wait_counter += 1
 
     def send(self, message):
-        message = message + "\r\n"
-        self.ser.write(message.encode())
+        # message = message + "\r\n"
+        message = message + "\n"
+        self.ser.write(message.encode("ascii"))
 
-    def receive(self):
+    def receive(self, q):
         while True:
             if self.ser.in_waiting > 0:  # there is something to read
                 time.sleep(0.1)
                 read_buffer = self.ser.read(self.ser.in_waiting)
-                if read_buffer != "":
-                    print("received a message:")
-                    print(read_buffer)
-                    read_buffer = ""
+                q.put(read_buffer.decode("ascii"))
 
     def clean_up(self):
         self.ser.close()
