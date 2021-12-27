@@ -19,6 +19,7 @@ default = {
 
 config = default.copy()
 config["enable_transmitting_mode"] = True
+config["enable_relay_function"] = True
 
 
 try:
