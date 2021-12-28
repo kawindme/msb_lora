@@ -118,7 +118,7 @@ def translate_7(byte_val: int) -> dict:
 
     enable_ambient_noise = bool(enable_ambient_noise_val)
 
-    transmit_power_dict = {0b00: "22dbm", 0b01: "17dbm", 0b10: "12dbm", 0b11: "10dbm"}
+    transmit_power_dict = {0b00: "22dBm", 0b01: "17dBm", 0b10: "12dBm", 0b11: "10dBm"}
     transmit_power = transmit_power_dict[transmit_power_val]
 
     return {
@@ -230,7 +230,9 @@ def command_to_dict(command_bytes: Sequence[int]) -> dict:
 
 if __name__ == "__main__":
 
-    reg_array = [0xC2, 0x00, 0x09, 0x00, 0x00, 0x00, 0x62, 0x00, 0x17, 0x00, 0x00, 0x00]
+    reg_array = bytes(
+        [0xC2, 0x00, 0x09, 0x00, 0x00, 0x00, 0x62, 0x00, 0x17, 0x00, 0x00, 0x00]
+    )
 
     command_dict = command_to_dict(reg_array)
 
