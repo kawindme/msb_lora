@@ -49,6 +49,17 @@ CFG_REG = [b'\xC2\x00\x09\x01\x02\x03\x62\x00\x41\x03\x00\x00']
 RET_REG = [b'\xC1\x00\x09\x01\x02\x03\x62\x00\x41\x03\x00\x00']
 
 """
+# from node_100_main.py:
+# under the same frequence,if set 65535,the node can receive
+# messages from another node of address is 0 to 65534 and similarly,
+# the address 0 to 65534 of node can receive messages while
+# the another note of address is 65535 sends.
+# otherwise two node must be same the address and frequence
+
+
+
+
+
 
 
 class LoRaHatDriver:
@@ -79,7 +90,9 @@ class LoRaHatDriver:
         self.WOR_period = config["WOR_period"]
         self.key = config["key"]
 
-        if self.enable_transmitting_mode:
+        if (
+            self.enable_transmitting_mode
+        ):  # TODO module adress and target address have to be the same -> only these can then comminicate
             # assert "target_address" in config
             self.target_address = config["target_address"]
 
