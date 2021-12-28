@@ -141,12 +141,12 @@ def translate_8(byte_val: int) -> int:
 
 def translate_9(byte_val: int) -> dict:
     """
-    enable_RSSI_byte(7), enable_transmitting_mode(6), enable_relay_function(5), enable_LBT(4), WOR_mode(3), WOR_period (2-0)
+    enable_RSSI_byte(7), enable_point_to_point_mode(6), enable_relay_function(5), enable_LBT(4), WOR_mode(3), WOR_period (2-0)
     """
     enable_RSSI_byte_mask = 0b10000000
     enable_RSSI_byte_shift = 7
-    enable_transmitting_mode_mask = 0b01000000
-    enable_transmitting_mode_shift = 6
+    enable_point_to_point_mode_mask = 0b01000000
+    enable_point_to_point_mode_shift = 6
     enable_relay_function_mask = 0b00100000
     enable_relay_function_shift = 5
     enable_LBT_mask = 0b00010000
@@ -159,9 +159,9 @@ def translate_9(byte_val: int) -> dict:
     enable_RSSI_byte_value = (
         byte_val & enable_RSSI_byte_mask
     ) >> enable_RSSI_byte_shift
-    enable_transmitting_mode_value = (
-        byte_val & enable_transmitting_mode_mask
-    ) >> enable_transmitting_mode_shift
+    enable_point_to_point_mode_value = (
+        byte_val & enable_point_to_point_mode_mask
+    ) >> enable_point_to_point_mode_shift
     enable_relay_function_value = (
         byte_val & enable_relay_function_mask
     ) >> enable_relay_function_shift
@@ -170,7 +170,7 @@ def translate_9(byte_val: int) -> dict:
     WOR_period_value = (byte_val & WOR_period_mask) >> WOR_period_shift
 
     enable_RSSI_byte = bool(enable_RSSI_byte_value)
-    enable_transmitting_mode = bool(enable_transmitting_mode_value)
+    enable_point_to_point_mode = bool(enable_point_to_point_mode_value)
     enable_relay_function = bool(enable_relay_function_value)
     enable_LBT = bool(enable_LBT_value)
     WOR_mode = WOR_mode_value
@@ -190,7 +190,7 @@ def translate_9(byte_val: int) -> dict:
 
     return {
         "enable_RSSI_byte": enable_RSSI_byte,
-        "enable_transmitting_mode": enable_transmitting_mode,
+        "enable_point_to_point_mode": enable_point_to_point_mode,
         "enable_relay_function": enable_relay_function,
         "enable_LBT": enable_LBT,
         "WOR_mode": WOR_mode,

@@ -9,7 +9,7 @@ default = {
     "transmit_power": "22dBm",
     "channel": 18,  # 18 default for SX1262, 23 default for SX1268
     "enable_RSSI_byte": False,
-    "enable_transmitting_mode": False,
+    "enable_point_to_point_mode": False,
     "enable_relay_function": False,
     "enable_LBT": False,
     "WOR_mode": 0,
@@ -18,7 +18,7 @@ default = {
 }
 
 config = default.copy()
-config["enable_transmitting_mode"] = True
+config["enable_point_to_point_mode"] = True
 config["enable_relay_function"] = True
 
 
