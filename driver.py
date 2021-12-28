@@ -49,8 +49,6 @@ except ImportError:
 # RET_REG = [b'\xC1\x00\x09\x01\x02\x03\x62\x00\x41\x03\x00\x00']
 
 
-
-
 CFG_HEADER = 0xC2  # Header to use if we want to set registers.
 RET_HEADER = 0xC1  # Header of the answer after registers have been set. Use it to check if set was successful.
 START_REG = 0x00  # begin with the first register
@@ -148,8 +146,6 @@ def make_reg_02h_byte(net_id: int) -> int:
     :param net_id: The network ID.
     :return: The network ID.
     """
-
-
 
     if 0 <= net_id <= 256 and type(net_id) == int:
         return net_id
@@ -287,7 +283,6 @@ def make_reg_05h_byte(channel: int) -> int:
     :param channel: The channel.
     :return: The channel / value for REG2.
     """
-
 
     if 0 <= channel <= 83:
         return channel

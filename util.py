@@ -1,7 +1,7 @@
 from collections.abc import Sequence
 
 
-def translate_0(byte_val: int) -> str:
+def parse_command_byte(byte_val: int) -> str:
     """Command byte"""
     if byte_val == 0xC2:
         return "Configure temporary registers"
@@ -13,19 +13,19 @@ def translate_0(byte_val: int) -> str:
         raise ValueError(f"Unknown register value {byte_val}")
 
 
-def translate_1(byte_val: int) -> int:
+def parse_start_byte(byte_val: int) -> int:
     """Start register"""
     assert 0 <= byte_val < 8
     return byte_val
 
 
-def translate_2(byte_val: int) -> int:
+def parse_data_length_byte(byte_val: int) -> int:
     """Length of data"""
     assert 0 <= byte_val <= 9
     return byte_val
 
 
-def translate_3_4(byte_val_3: int, byte_val_4: int) -> int:
+def parse_reg_00h_and_01h_bytes(byte_val_3: int, byte_val_4: int) -> int:
     """Module address"""
     assert 0 <= byte_val_3 < 256
     assert 0 <= byte_val_4 < 256
@@ -37,13 +37,13 @@ def translate_3_4(byte_val_3: int, byte_val_4: int) -> int:
     return byte_val_3 << 8 | byte_val_4
 
 
-def translate_5(byte_val: int) -> int:
+def parse_reg_02h_byte(byte_val: int) -> int:
     """Net ID"""
     assert 0 <= byte_val < 256
     return byte_val
 
 
-def translate_6(byte_val: int) -> dict:
+def parse_reg_03h_byte(byte_val: int) -> dict:
     """baud rate(7-5), parity bit(4-3), wireless air speed / bps (2-0)"""
     assert 0 <= byte_val < 256
 
@@ -88,7 +88,7 @@ def translate_6(byte_val: int) -> dict:
     return {"baud_rate": baud_rate, "parity_bit": parity_bit, "air_speed": air_speed}
 
 
-def translate_7(byte_val: int) -> dict:
+def parse_reg_04h_byte(byte_val: int) -> dict:
     """
     packet_len(7-6), enable_ambient_noise(5), transmit_power(1-0)
 
@@ -128,7 +128,7 @@ def translate_7(byte_val: int) -> dict:
     }
 
 
-def translate_8(byte_val: int) -> int:
+def parse_reg_05h_byte(byte_val: int) -> int:
     """
     Channel control (CH) 0-83. 84 channels in total
 
@@ -139,7 +139,7 @@ def translate_8(byte_val: int) -> int:
     return byte_val
 
 
-def translate_9(byte_val: int) -> dict:
+def parse_reg_06h_byte(byte_val: int) -> dict:
     """
     enable_RSSI_byte(7), enable_point_to_point_mode(6), enable_relay_function(5), enable_LBT(4), WOR_mode(3), WOR_period (2-0)
     """
@@ -198,7 +198,7 @@ def translate_9(byte_val: int) -> dict:
     }
 
 
-def translate_10_11(byte_val_10: int, byte_val_11: int) -> int:
+def parse_07h_and_08h_bytes(byte_val_10: int, byte_val_11: int) -> int:
     """Key"""
     assert 0 <= byte_val_10 < 256
     assert 0 <= byte_val_11 < 256
@@ -214,16 +214,18 @@ def command_to_dict(command_bytes: Sequence[int]) -> dict:
     assert len(command_bytes) == 12
 
     command_dict = {}
-    command_dict["command"] = translate_0(command_bytes[0])
-    command_dict["start_register"] = translate_1(command_bytes[1])
-    command_dict["data_length"] = translate_2(command_bytes[2])
-    command_dict["module_address"] = translate_3_4(command_bytes[3], command_bytes[4])
-    command_dict["net_id"] = translate_5(command_bytes[5])
-    command_dict.update(translate_6(command_bytes[6]))
-    command_dict.update(translate_7(command_bytes[7]))
-    command_dict["channel"] = translate_8(command_bytes[8])
-    command_dict.update(translate_9(command_bytes[9]))
-    command_dict["key"] = translate_10_11(command_bytes[10], command_bytes[11])
+    command_dict["command"] = parse_command_byte(command_bytes[0])
+    command_dict["start_register"] = parse_start_byte(command_bytes[1])
+    command_dict["data_length"] = parse_data_length_byte(command_bytes[2])
+    command_dict["module_address"] = parse_reg_00h_and_01h_bytes(
+        command_bytes[3], command_bytes[4]
+    )
+    command_dict["net_id"] = parse_reg_02h_byte(command_bytes[5])
+    command_dict.update(parse_reg_03h_byte(command_bytes[6]))
+    command_dict.update(parse_reg_04h_byte(command_bytes[7]))
+    command_dict["channel"] = parse_reg_05h_byte(command_bytes[8])
+    command_dict.update(parse_reg_06h_byte(command_bytes[9]))
+    command_dict["key"] = parse_07h_and_08h_bytes(command_bytes[10], command_bytes[11])
 
     return command_dict
 
