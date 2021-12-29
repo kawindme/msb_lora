@@ -1,5 +1,15 @@
 from collections.abc import Sequence
 
+from driver import (
+    BaudRate,
+    ParityBit,
+    AirSpeed,
+    PacketLen,
+    TransmitPower,
+    WORMode,
+    WORPeriod,
+)
+
 
 def parse_command_byte(byte_val: int) -> str:
     """Command byte"""
@@ -58,32 +68,11 @@ def parse_reg_03h_byte(byte_val: int) -> dict:
     parity_bit_val = (byte_val & parity_bit_mask) >> parity_bit_shift
     air_speed_val = (byte_val & air_speed_mask) >> air_speed_shift
 
-    baud_rate_dict = {
-        0b000: 1200,
-        0b001: 2400,
-        0b010: 4800,
-        0b011: 9600,
-        0b100: 19200,
-        0b101: 38400,
-        0b110: 57600,
-        0b111: 115200,
-    }
-    baud_rate = baud_rate_dict[baud_rate_val]
+    baud_rate = BaudRate(baud_rate_val)
 
-    parity_bit_dict = {0b00: "8N1", 0b01: "8O1", 0b10: "8E1", 0b11: "8N1"}
-    parity_bit = parity_bit_dict[parity_bit_val]
+    parity_bit = ParityBit(parity_bit_val)
 
-    air_speed_dict = {
-        0b000: "0.3K",
-        0b001: "1.2K",
-        0b010: "2.4K",
-        0b011: "4.8K",
-        0b100: "9.6K",
-        0b101: "19.2K",
-        0b110: "38.4K",
-        0b111: "62.5K",
-    }
-    air_speed = air_speed_dict[air_speed_val]
+    air_speed = AirSpeed(air_speed_val)
 
     return {"baud_rate": baud_rate, "parity_bit": parity_bit, "air_speed": air_speed}
 
@@ -96,30 +85,24 @@ def parse_reg_04h_byte(byte_val: int) -> dict:
     """
     packet_len_mask = 0b11000000
     packet_len_shift = 6
-    enable_ambient_noise_mask = 0b00100000
-    enable_ambient_noise_shift = 5
+    ambient_noise_mask = 0b00100000
+    ambient_noise_shift = 5
     reserved_mask = 0b00011100
     reserved_shift = 2
     transmit_power_mask = 0b00000011
     transmit_power_shift = 0
 
     packet_len_val = (byte_val & packet_len_mask) >> packet_len_shift
-    enable_ambient_noise_val = (
-        byte_val & enable_ambient_noise_mask
-    ) >> enable_ambient_noise_shift
+    ambient_noise_val = (byte_val & ambient_noise_mask) >> ambient_noise_shift
     reserved_val = (byte_val & reserved_mask) >> reserved_shift
     transmit_power_val = (byte_val & transmit_power_mask) >> transmit_power_shift
 
     assert reserved_val == 0
     del reserved_val
 
-    packet_len_dict = {0b00: 240, 0b01: 128, 0b10: 64, 0b11: 32}
-    packet_len = packet_len_dict[packet_len_val]
-
-    enable_ambient_noise = bool(enable_ambient_noise_val)
-
-    transmit_power_dict = {0b00: "22dBm", 0b01: "17dBm", 0b10: "12dBm", 0b11: "10dBm"}
-    transmit_power = transmit_power_dict[transmit_power_val]
+    packet_len = PacketLen(packet_len_val)
+    enable_ambient_noise = bool(ambient_noise_val)
+    transmit_power = TransmitPower(transmit_power_val)
 
     return {
         "packet_len": packet_len,
@@ -143,50 +126,34 @@ def parse_reg_06h_byte(byte_val: int) -> dict:
     """
     enable_RSSI_byte(7), enable_point_to_point_mode(6), enable_relay_function(5), enable_LBT(4), WOR_mode(3), WOR_period (2-0)
     """
-    enable_RSSI_byte_mask = 0b10000000
-    enable_RSSI_byte_shift = 7
-    enable_point_to_point_mode_mask = 0b01000000
-    enable_point_to_point_mode_shift = 6
-    enable_relay_function_mask = 0b00100000
-    enable_relay_function_shift = 5
-    enable_LBT_mask = 0b00010000
-    enable_LBT_shift = 4
+    RSSI_byte_mask = 0b10000000
+    RSSI_byte_shift = 7
+    point_to_point_mode_mask = 0b01000000
+    point_to_point_mode_shift = 6
+    relay_function_mask = 0b00100000
+    relay_function_shift = 5
+    LBT_mask = 0b00010000
+    LBT_shift = 4
     WOR_mode_mask = 0b00001000
     WOR_mode_shift = 3
     WOR_period_mask = 0b00000111
     WOR_period_shift = 0
 
-    enable_RSSI_byte_value = (
-        byte_val & enable_RSSI_byte_mask
-    ) >> enable_RSSI_byte_shift
-    enable_point_to_point_mode_value = (
-        byte_val & enable_point_to_point_mode_mask
-    ) >> enable_point_to_point_mode_shift
-    enable_relay_function_value = (
-        byte_val & enable_relay_function_mask
-    ) >> enable_relay_function_shift
-    enable_LBT_value = (byte_val & enable_LBT_mask) >> enable_LBT_shift
+    RSSI_byte_value = (byte_val & RSSI_byte_mask) >> RSSI_byte_shift
+    point_to_point_mode_value = (
+        byte_val & point_to_point_mode_mask
+    ) >> point_to_point_mode_shift
+    relay_function_value = (byte_val & relay_function_mask) >> relay_function_shift
+    LBT_value = (byte_val & LBT_mask) >> LBT_shift
     WOR_mode_value = (byte_val & WOR_mode_mask) >> WOR_mode_shift
     WOR_period_value = (byte_val & WOR_period_mask) >> WOR_period_shift
 
-    enable_RSSI_byte = bool(enable_RSSI_byte_value)
-    enable_point_to_point_mode = bool(enable_point_to_point_mode_value)
-    enable_relay_function = bool(enable_relay_function_value)
-    enable_LBT = bool(enable_LBT_value)
-    WOR_mode = WOR_mode_value
-
-    WOR_period_dict = {
-        0b000: 500,
-        0b001: 1000,
-        0b010: 1500,
-        0b011: 2000,
-        0b100: 2500,
-        0b101: 3000,
-        0b110: 3500,
-        0b111: 4000,
-    }
-
-    WOR_period = WOR_period_dict[WOR_period_value]
+    enable_RSSI_byte = bool(RSSI_byte_value)
+    enable_point_to_point_mode = bool(point_to_point_mode_value)
+    enable_relay_function = bool(relay_function_value)
+    enable_LBT = bool(LBT_value)
+    WOR_mode = WORMode(WOR_mode_value)
+    WOR_period = WORPeriod(WOR_period_value)
 
     return {
         "enable_RSSI_byte": enable_RSSI_byte,

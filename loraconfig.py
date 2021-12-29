@@ -1,4 +1,12 @@
-from driver import BaudRate, ParityBit, AirSpeed, PacketLen, TransmitPower, WORMode, WORPeriod
+from driver import (
+    BaudRate,
+    ParityBit,
+    AirSpeed,
+    PacketLen,
+    TransmitPower,
+    WORMode,
+    WORPeriod,
+)
 
 lora_hat_default = {
     "module_address": 0,

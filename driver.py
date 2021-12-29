@@ -214,7 +214,9 @@ def make_reg_02h_byte(net_id: int) -> int:
         raise ValueError(f"net_id must be an int between 0 and 256, but was {net_id}.")
 
 
-def make_reg_03h_byte(baud_rate: BaudRate, parity_bit: ParityBit, air_speed: AirSpeed) -> int:
+def make_reg_03h_byte(
+    baud_rate: BaudRate, parity_bit: ParityBit, air_speed: AirSpeed
+) -> int:
     """
     Make the byte for REG0.
 
@@ -231,7 +233,11 @@ def make_reg_03h_byte(baud_rate: BaudRate, parity_bit: ParityBit, air_speed: Air
     baud_rate_shift = 5
     parity_bit_shift = 3
 
-    return (baud_rate.value << baud_rate_shift) | (parity_bit.value << parity_bit_shift) | air_speed.value
+    return (
+        (baud_rate.value << baud_rate_shift)
+        | (parity_bit.value << parity_bit_shift)
+        | air_speed.value
+    )
 
 
 def make_reg_04h_byte(
@@ -253,7 +259,11 @@ def make_reg_04h_byte(
     packet_len_shift = 6
     ambient_noise_shift = 5
 
-    return (packet_len.value << packet_len_shift) | (int(enable_ambient_noise) << ambient_noise_shift) | transmit_power.value
+    return (
+        (packet_len.value << packet_len_shift)
+        | (int(enable_ambient_noise) << ambient_noise_shift)
+        | transmit_power.value
+    )
 
 
 def make_reg_05h_byte(channel: int) -> int:
@@ -321,12 +331,12 @@ def make_reg_06h_byte(
     WOR_mode_shift = 3
 
     return (
-            (int(enable_RSSI_byte) << RSSI_byte_shift) |
-            (int(enable_point_to_point_mode) << point_to_point_mode_shift) |
-            (int(enable_relay_function) << relay_function_shift) |
-            (int(enable_LBT) << LBT_shift) |
-            (WOR_mode.value << WOR_mode_shift) |
-            WOR_period.value
+        (int(enable_RSSI_byte) << RSSI_byte_shift)
+        | (int(enable_point_to_point_mode) << point_to_point_mode_shift)
+        | (int(enable_relay_function) << relay_function_shift)
+        | (int(enable_LBT) << LBT_shift)
+        | (WOR_mode.value << WOR_mode_shift)
+        | WOR_period.value
     )
 
 
@@ -451,7 +461,7 @@ class LoRaHatDriver:
 
     def send(self, message):
         message = message + "\r\n"
-        #message = message + "\n"
+        # message = message + "\n"
         bin_message = message.encode("utf-8")
         if self.enable_point_to_point_mode:
             # point to point -> requires prepended target address
