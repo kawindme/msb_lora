@@ -415,11 +415,14 @@ class LoRaHatDriver:
         self.WOR_period = config["WOR_period"]
         self.key = config["key"]
 
-        if (
-            self.enable_point_to_point_mode
-        ):  # TODO module adress and target address have to be the same -> only these can then comminicate
-            # assert "target_address" in config
+        try:
             self.target_address = config["target_address"]
+        except KeyError:
+            logging.debug(
+                "target_address was not supplied in config. "
+                "Will not be able to send messages in point to point mode."
+            )
+            self.target_address = None
 
         GPIO.setmode(GPIO.BCM)  # https://raspberrypi.stackexchange.com/a/12967
         GPIO.setwarnings(False)  # suppress channel already in use warning
