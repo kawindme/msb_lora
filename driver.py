@@ -512,6 +512,9 @@ class LoRaHatDriver:
                 read_buffer = self.ser.read(self.ser.in_waiting)
                 q.put(read_buffer.decode("utf-8"))
 
+    def read_config_from_hat(self):
+        pass
+
     def clean_up(self):
         self.ser.close()
         GPIO.cleanup()
