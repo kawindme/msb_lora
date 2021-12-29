@@ -419,7 +419,7 @@ class LoRaHatDriver:
         # create serial object but do not open file yet
         self.ser = serial.Serial()
         self.ser.port = "/dev/ttyS0"
-        self.ser.baudrate = int(self.baud_rate.split("_")[1])
+        self.ser.baudrate = int(self.baud_rate.name.split("_")[1])
 
     def __enter__(self):
         self.apply_config()
