@@ -6,6 +6,8 @@ import serial
 import time
 import logging
 
+from enum import Enum
+
 try:
     import RPi.GPIO as GPIO
 except ImportError:
@@ -54,6 +56,34 @@ CFG_HEADER = 0xC2  # Header to use if we want to set registers.
 RET_HEADER = 0xC1  # Header of the answer after registers have been set. Use it to check if set was successful.
 START_REG = 0x00  # begin with the first register
 NUM_REG = 0x09  # set 9 registers
+
+
+class BaudRate(Enum):
+    BR_1200 = 0b000
+    BR_2400 = 0b001
+    BR_4800 = 0b010
+    BR_9600 = 0b011
+    BR_19200 = 0b100
+    BR_38400 = 0b101
+    BR_57600 = 0b110
+    BR_115200 = 0b111
+
+
+class ParityBit(Enum):
+    PB_8N1 = 0b00
+    PB_8O1 = 0b01
+    PB_8E1 = 0b10
+
+
+class AirSpeed(Enum):
+    AS_0_3K = 0b000
+    AS_1_2K = 0b001
+    AS_2_4K = 0b010
+    AS_4_8K = 0b011
+    AS_9_6K = 0b100
+    AS_19_2K = 0b101
+    AS_38_4K = 0b110
+    AS_62_5K = 0b111
 
 
 def serialize_config(config):
@@ -154,7 +184,7 @@ def make_reg_02h_byte(net_id: int) -> int:
         raise ValueError(f"net_id must be an int between 0 and 256, but was {net_id}.")
 
 
-def make_reg_03h_byte(baud_rate: int, parity_bit: str, air_speed: str) -> int:
+def make_reg_03h_byte(baud_rate: BaudRate, parity_bit: ParityBit, air_speed: AirSpeed) -> int:
     """
     Make the byte for REG0.
 
@@ -168,52 +198,9 @@ def make_reg_03h_byte(baud_rate: int, parity_bit: str, air_speed: str) -> int:
     :return: The value for REG0.
     """
 
-    baud_rate_dict = {
-        1200: "000",
-        2400: "001",
-        4800: "010",
-        9600: "011",
-        19200: "100",
-        38400: "101",
-        57600: "110",
-        115200: "111",
-    }
-    try:
-        baud_rate_str = baud_rate_dict[baud_rate]
-    except KeyError:
-        raise RuntimeError(
-            f"Unknown baud rate {baud_rate}. Possible values are {baud_rate_dict.keys()}."
-        )
-
-    parity_bit_dict = {
-        "8N1": "00",
-        "8O1": "01",
-        "8E1": "10",
-    }
-    try:
-        parity_bit_str = parity_bit_dict[parity_bit]
-    except KeyError:
-        raise RuntimeError(
-            f"Unknown parity bit {parity_bit}. Possible values are {parity_bit_dict.keys()}."
-        )
-
-    air_speed_dict = {
-        "0.3K": "000",
-        "1.2K": "001",
-        "2.4K": "010",
-        "4.8K": "011",
-        "9.6K": "100",
-        "19.2K": "101",
-        "38.4K": "110",
-        "62.5K": "111",
-    }
-
-    try:
-        air_speed_str = air_speed_dict[air_speed]
-    except KeyError:
-        raise RuntimeError(
-            f"Unknown air speed {air_speed}. Possible values are {air_speed_dict.keys()}."
-        )
+    baud_rate_str = f"{baud_rate.value:03b}"
+    parity_bit_str = f"{parity_bit.value:02b}"
+    air_speed_str = f"{air_speed.value:03b}"
 
     return int(baud_rate_str + parity_bit_str + air_speed_str, 2)
 

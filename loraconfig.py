@@ -1,9 +1,11 @@
+from driver import BaudRate, ParityBit, AirSpeed
+
 lora_hat_default = {
     "module_address": 0,
     "net_id": 0,
-    "baud_rate": 9600,
-    "parity_bit": "8N1",
-    "air_speed": "2.4K",
+    "baud_rate": BaudRate.BR_9600,
+    "parity_bit": ParityBit.PB_8N1,
+    "air_speed": AirSpeed.AS_2_4K,
     "packet_len": 240,
     "enable_ambient_noise": False,
     "transmit_power": "22dBm",
