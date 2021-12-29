@@ -18,8 +18,7 @@ lora_hat_default = {
 }
 
 lora_hat_config = lora_hat_default.copy()
-#lora_hat_config["enable_point_to_point_mode"] = True
-#lora_hat_config["enable_relay_function"] = True
+lora_hat_config["enable_point_to_point_mode"] = True
 
 
 try:
