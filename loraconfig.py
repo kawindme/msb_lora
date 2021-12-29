@@ -1,3 +1,6 @@
+import logging
+import os
+
 from driver import (
     BaudRate,
     ParityBit,
@@ -30,10 +33,18 @@ lora_hat_default = {
 lora_hat_config = lora_hat_default.copy()
 lora_hat_config["enable_point_to_point_mode"] = True
 
-
+# (Partly) overwrite with localconfig
 try:
     import localconfig
-
     lora_hat_config.update(localconfig.lora_hat_config)
 except ImportError:
     pass
+
+
+try:
+    lora_hat_config["key"] = int(os.environ["MSB_LORA_HAT_KEY"])
+except KeyError:  # Environment variable not set
+    pass
+
+if lora_hat_config["key"] == 0:
+    logging.warning("No secret key set.")
