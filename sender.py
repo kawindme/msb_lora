@@ -1,9 +1,9 @@
 import socket
-import loraconfig
-from driver import LoRaHatDriver
 import time
+from loraconfig import lora_hat_config as config
+from driver import LoRaHatDriver
 
-config = loraconfig.default.copy()
+
 hostname = socket.gethostname()
 with LoRaHatDriver(config) as lora_hat:
     while True:

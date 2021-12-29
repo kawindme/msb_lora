@@ -1,13 +1,10 @@
 import queue
 import threading
 
-import loraconfig
+from loraconfig import lora_hat_config as config
 from driver import LoRaHatDriver
 
-config = loraconfig.default.copy()
-
 q = queue.SimpleQueue()
-
 
 def print_received_data():
     while True:

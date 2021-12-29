@@ -1,4 +1,4 @@
-default = {
+lora_hat_default = {
     "module_address": 0,
     "net_id": 0,
     "baud_rate": 9600,
@@ -17,14 +17,13 @@ default = {
     "key": 0,
 }
 
-config = default.copy()
-config["enable_point_to_point_mode"] = True
-config["enable_relay_function"] = True
+lora_hat_config = lora_hat_default.copy()
+lora_hat_config["enable_point_to_point_mode"] = True
+lora_hat_config["enable_relay_function"] = True
 
 
 try:
     import localconfig
-
-    config.update(localconfig.config)
+    lora_hat_config.update(localconfig.lora_hat_config)
 except ImportError:
     pass
