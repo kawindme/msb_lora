@@ -512,6 +512,13 @@ class LoRaHatDriver:
     def key(self):
         return self.config["key"]
 
+    @property
+    def target_address(self):
+        try:
+            return self.config["target_address"]
+        except KeyError:
+            return None
+
     def apply_config(self):
 
         command_bytes = serialize_config(self.config)
@@ -551,11 +558,13 @@ class LoRaHatDriver:
         # message = message + "\r\n"
         message = message + "\n"
         bin_message = message.encode("utf-8")
-        if (
-            self.enable_point_to_point_mode
-        ):  # point to point -> requires prepended target address
+        if self.enable_point_to_point_mode:
+            # point to point -> requires prepended target address
             # When point to point transmitting, module will recognize the
             # first three byte as Address High + Address Low + Channel. and wireless transmit it
+            if self.target_address is None:
+                raise RuntimeError("When sending in point to point transmitting mode "
+                                   "target_address has to be set in config.")
             address_header = bytearray(3)
             address_header[0] = make_reg_00h_byte(self.target_address)
             address_header[1] = make_reg_01h_byte(self.target_address)
