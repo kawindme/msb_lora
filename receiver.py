@@ -6,6 +6,7 @@ from driver import LoRaHatDriver
 
 q = queue.SimpleQueue()
 
+
 def print_received_data():
     while True:
         print(q.get())

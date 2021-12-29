@@ -24,6 +24,7 @@ lora_hat_config["enable_relay_function"] = True
 
 try:
     import localconfig
+
     lora_hat_config.update(localconfig.lora_hat_config)
 except ImportError:
     pass

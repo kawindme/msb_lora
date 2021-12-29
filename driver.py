@@ -550,7 +550,7 @@ class LoRaHatDriver:
     def send(self, message):
         # message = message + "\r\n"
         message = message + "\n"
-        bin_message = message.encode("ascii")
+        bin_message = message.encode("utf-8")
         if (
             self.enable_point_to_point_mode
         ):  # point to point -> requires prepended target address
@@ -575,7 +575,7 @@ class LoRaHatDriver:
             if self.ser.in_waiting > 0:  # there is something to read
                 time.sleep(0.1)
                 read_buffer = self.ser.read(self.ser.in_waiting)
-                q.put(read_buffer.decode("ascii"))
+                q.put(read_buffer.decode("utf-8"))
 
     def clean_up(self):
         self.ser.close()
