@@ -12,3 +12,18 @@ def test_config_serialize():
     assert recovered_conf.pop("data_length") == 9
 
     assert recovered_conf == conf
+
+def test_config_example_relay():
+    relay_config_bytes= b'\xC2\x00\x09\x01\x02\x03\x62\x00\x12\x03\x00\x00'
+    conf_dict = command_to_dict(relay_config_bytes)
+    recovered_config_bytes = serialize_config(conf_dict)
+
+    assert relay_config_bytes == recovered_config_bytes
+
+
+def test_config_example_transparent_scx126x():
+    sx126x_config_bytes = bytes([0xC2, 0x00, 0x09, 0x00, 0x00, 0x00, 0x62, 0x00, 0x17, 0x00, 0x00, 0x00])
+    conf_dict = command_to_dict(sx126x_config_bytes)
+    recovered_config_bytes = serialize_config(conf_dict)
+
+    assert sx126x_config_bytes == recovered_config_bytes
