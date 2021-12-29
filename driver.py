@@ -395,25 +395,28 @@ class LoRaHatDriver:
 
     M0 = 22
     M1 = 27
+    mandatory_config_keys = [
+        "module_address",
+        "net_id",
+        "baud_rate",
+        "parity_bit",
+        "air_speed",
+        "packet_len",
+        "enable_ambient_noise",
+        "transmit_power",
+        "channel",
+        "enable_RSSI_byte",
+        "enable_point_to_point_mode",
+        "enable_relay_function",
+        "enable_LBT",
+        "WOR_mode",
+        "WOR_period",
+        "key",
+    ]
 
     def __init__(self, config):
+        self._check_config(config)
         self.config = config
-        self.module_address = config["module_address"]
-        self.net_id = config["net_id"]
-        self.baud_rate = config["baud_rate"]
-        self.parity_bit = config["parity_bit"]
-        self.air_speed = config["air_speed"]
-        self.packet_len = config["packet_len"]
-        self.enable_ambient_noise = config["enable_ambient_noise"]
-        self.transmit_power = config["transmit_power"]
-        self.channel = config["channel"]
-        self.enable_RSSI_byte = config["enable_RSSI_byte"]
-        self.enable_point_to_point_mode = config["enable_point_to_point_mode"]
-        self.enable_relay_function = config["enable_relay_function"]
-        self.enable_LBT = config["enable_LBT"]
-        self.WOR_mode = config["WOR_mode"]
-        self.WOR_period = config["WOR_period"]
-        self.key = config["key"]
 
         if (
             self.enable_point_to_point_mode
@@ -439,6 +442,75 @@ class LoRaHatDriver:
         self.ser.close()
         GPIO.cleanup()
         print("Successfully shut down.")
+
+    def _check_config(self, config):
+        for key in self.mandatory_config_keys:
+            if key not in config:
+                raise ValueError(f"Mandatory config key '{key}' is missing.")
+
+    @property
+    def module_address(self):
+        return self.config["module_address"]
+
+    @property
+    def net_id(self):
+        return self.config["net_id"]
+
+    @property
+    def baud_rate(self):
+        return self.config["baud_rate"]
+
+    @property
+    def parity_bit(self):
+        return self.config["parity_bit"]
+
+    @property
+    def air_speed(self):
+        return self.config["air_speed"]
+
+    @property
+    def packet_len(self):
+        return self.config["packet_len"]
+
+    @property
+    def enable_ambient_noise(self):
+        return self.config["enable_ambient_noise"]
+
+    @property
+    def transmit_power(self):
+        return self.config["transmit_power"]
+
+    @property
+    def channel(self):
+        return self.config["channel"]
+
+    @property
+    def enable_RSSI_byte(self):
+        return self.config["enable_RSSI_byte"]
+
+    @property
+    def enable_point_to_point_mode(self):
+        return self.config["enable_point_to_point_mode"]
+
+    @property
+    def enable_relay_function(self):
+        return self.config["enable_relay_function"]
+
+    @property
+    def enable_LBT(self):
+        return self.config["enable_LBT"]
+
+    @property
+    def WOR_mode(self):
+        return self.config["WOR_mode"]
+
+    @property
+    def WOR_period(self):
+        return self.config["WOR_period"]
+
+    @property
+    def key(self):
+        return self.config["key"]
 
     def apply_config(self):
 
@@ -477,7 +549,7 @@ class LoRaHatDriver:
 
     def send(self, message):
         # message = message + "\r\n"
-        # message = message + "\n"
+        message = message + "\n"
         bin_message = message.encode("ascii")
         if (
             self.enable_point_to_point_mode
@@ -495,8 +567,10 @@ class LoRaHatDriver:
 
     def receive(self, q):
         if self.module_address != "0xFFFF" and self.enable_point_to_point_mode:
-            logging.debug("Module address is not set to 0xFFFF (broadcast address) and point to point mode is enabled. "
-                          "Will only receive messages from nodes with the same module address.")
+            logging.debug(
+                "Module address is not set to 0xFFFF (broadcast address) and point to point mode is enabled. "
+                "Will only receive messages from nodes with the same module address."
+            )
         while True:
             if self.ser.in_waiting > 0:  # there is something to read
                 time.sleep(0.1)
