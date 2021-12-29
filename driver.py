@@ -4,6 +4,7 @@
 # import RPi.GPIO as GPIO
 import serial
 import time
+import logging
 
 try:
     import RPi.GPIO as GPIO
@@ -506,7 +507,7 @@ class LoRaHatDriver:
 
     def send(self, message):
         # message = message + "\r\n"
-        message = message + "\n"
+        # message = message + "\n"
         bin_message = message.encode("ascii")
         if (
             self.enable_point_to_point_mode
@@ -523,6 +524,9 @@ class LoRaHatDriver:
         self.ser.write(bin_message)
 
     def receive(self, q):
+        if self.module_address != "0xFFFF" and self.enable_point_to_point_mode:
+            logging.debug("Module address is not set to 0xFFFF (broadcast address) and point to point mode is enabled. "
+                          "Will only receive messages from nodes with the same module address.")
         while True:
             if self.ser.in_waiting > 0:  # there is something to read
                 time.sleep(0.1)
