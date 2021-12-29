@@ -1,4 +1,4 @@
-from driver import BaudRate, ParityBit, AirSpeed
+from driver import BaudRate, ParityBit, AirSpeed, PacketLen, TransmitPower, WORMode, WORPeriod
 
 lora_hat_default = {
     "module_address": 0,
@@ -6,16 +6,16 @@ lora_hat_default = {
     "baud_rate": BaudRate.BR_9600,
     "parity_bit": ParityBit.PB_8N1,
     "air_speed": AirSpeed.AS_2_4K,
-    "packet_len": 240,
+    "packet_len": PacketLen.PL_240B,
     "enable_ambient_noise": False,
-    "transmit_power": "22dBm",
+    "transmit_power": TransmitPower.TP_22dBm,
     "channel": 18,  # 18 default for SX1262, 23 default for SX1268
     "enable_RSSI_byte": False,
     "enable_point_to_point_mode": False,
     "enable_relay_function": False,
     "enable_LBT": False,
-    "WOR_mode": 0,
-    "WOR_period": 500,
+    "WOR_mode": WORMode.WOR_transmit,
+    "WOR_period": WORPeriod.WP_500ms,
     "key": 0,
 }
 

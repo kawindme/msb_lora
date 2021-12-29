@@ -86,6 +86,36 @@ class AirSpeed(Enum):
     AS_62_5K = 0b111
 
 
+class PacketLen(Enum):
+    PL_240B = 0b00
+    PL_128B = 0b01
+    PL_64B = 0b10
+    PL_32B = 0b11
+
+
+class TransmitPower(Enum):
+    TP_22dBm = 0b00
+    TP_17dBm = 0b01
+    TP_12dBm = 0b10
+    TP_10dBm = 0b11
+
+
+class WORMode(Enum):
+    WOR_transmit = 0b0
+    WOR_listen = 0b1
+
+
+class WORPeriod(Enum):
+    WP_500ms = 0b000
+    WP_1000ms = 0b001
+    WP_1500ms = 0b010
+    WP_2000ms = 0b011
+    WP_2500ms = 0b100
+    WP_3000ms = 0b101
+    WP_3500ms = 0b110
+    WP_4000ms = 0b111
+
+
 def serialize_config(config):
     command = [0] * 12
 
@@ -198,15 +228,14 @@ def make_reg_03h_byte(baud_rate: BaudRate, parity_bit: ParityBit, air_speed: Air
     :return: The value for REG0.
     """
 
-    baud_rate_str = f"{baud_rate.value:03b}"
-    parity_bit_str = f"{parity_bit.value:02b}"
-    air_speed_str = f"{air_speed.value:03b}"
+    baud_rate_shift = 5
+    parity_bit_shift = 3
 
-    return int(baud_rate_str + parity_bit_str + air_speed_str, 2)
+    return (baud_rate.value << baud_rate_shift) | (parity_bit.value << parity_bit_shift) | air_speed.value
 
 
 def make_reg_04h_byte(
-    packet_len: int, enable_ambient_noise: bool, transmit_power: str
+    packet_len: PacketLen, enable_ambient_noise: bool, transmit_power: TransmitPower
 ) -> int:
     """
     Make the byte for REG1.
@@ -221,40 +250,10 @@ def make_reg_04h_byte(
     :return: The value for REG1.
     """
 
-    packet_len_dict = {
-        240: "00",
-        128: "01",
-        64: "10",
-        32: "11",
-    }
+    packet_len_shift = 6
+    ambient_noise_shift = 5
 
-    try:
-        packet_len_str = packet_len_dict[packet_len]
-    except KeyError:
-        raise RuntimeError(
-            f"Unknown air speed {packet_len}. Possible values are {packet_len_dict.keys()}."
-        )
-
-    if not enable_ambient_noise:
-        ambient_noise_str = "0"
-    else:
-        ambient_noise_str = "1"
-
-    transmit_power_dict = {
-        "22dbm": "00",
-        "17dbm": "01",
-        "12dbm": "10",
-        "10dbm": "11",
-    }
-
-    try:
-        transmit_power_str = transmit_power_dict[transmit_power.lower()]
-    except KeyError:
-        raise RuntimeError(
-            f"Unknown transmit_power {transmit_power}. Possible values are {transmit_power_dict.keys()}."
-        )
-
-    return int(packet_len_str + ambient_noise_str + transmit_power_str, 2)
+    return (packet_len.value << packet_len_shift) | (int(enable_ambient_noise) << ambient_noise_shift) | transmit_power.value
 
 
 def make_reg_05h_byte(channel: int) -> int:
@@ -285,10 +284,14 @@ def make_reg_06h_byte(
     enable_point_to_point_mode: bool,
     enable_relay_function: bool,
     enable_LBT: bool,
-    WOR_mode: int,
-    WOR_period: int,
+    WOR_mode: WORMode,
+    WOR_period: WORPeriod,
 ) -> int:
     """
+    Make the byte for REG3.
+
+    enable_RSSI_byte(7), enable_point_to_point_mode(6), enable_relay_function(5), enable_LBT(4), WOR_mode(3), WOR_period (2-0)
+
     :param enable_RSSI_byte: After enabling, data sent to serial port is added with a RSSI byte after receiving.
     :param enable_point_to_point_mode: When point to point transmitting, module will recognize the first three byte as
     Address High + Address Low + Channel and wireless transmit it. Default: False = transparent mode
@@ -311,38 +314,19 @@ def make_reg_06h_byte(
     :return: The value for REG3.
     """
 
-    RSSI_byte_str = "0" if not enable_RSSI_byte else "1"
-    transmitting_mode_str = "0" if not enable_point_to_point_mode else "1"
-    relay_function_str = "0" if not enable_relay_function else "1"
-    LBT_str = "0" if not enable_LBT else "1"
+    RSSI_byte_shift = 7
+    point_to_point_mode_shift = 6
+    relay_function_shift = 5
+    LBT_shift = 4
+    WOR_mode_shift = 3
 
-    WOR_mode_str = "0" if WOR_mode == 0 else "1"
-
-    WOR_period_dict = {
-        500: "000",
-        1000: "001",
-        1500: "010",
-        2000: "011",
-        2500: "100",
-        3000: "101",
-        3500: "110",
-        4000: "111",
-    }
-    try:
-        WOR_period_str = WOR_period_dict[WOR_period]
-    except KeyError:
-        raise RuntimeError(
-            f"Unknown WOR period {WOR_period}. Possible values are {WOR_period_dict.keys()}."
-        )
-
-    return int(
-        RSSI_byte_str
-        + transmitting_mode_str
-        + relay_function_str
-        + LBT_str
-        + WOR_mode_str
-        + WOR_period_str,
-        2,
+    return (
+            (int(enable_RSSI_byte) << RSSI_byte_shift) |
+            (int(enable_point_to_point_mode) << point_to_point_mode_shift) |
+            (int(enable_relay_function) << relay_function_shift) |
+            (int(enable_LBT) << LBT_shift) |
+            (WOR_mode.value << WOR_mode_shift) |
+            WOR_period.value
     )
 
 
