@@ -442,8 +442,8 @@ class LoRaHatDriver:
 
     def apply_config(self):
 
-        config_command = serialize_config(self.config)
-        answer_command = RET_HEADER + config_command[1:]
+        command_bytes = serialize_config(self.config)
+        answer_bytes = bytes([RET_HEADER]) + command_bytes[1:]
 
         # enter configuration mode
         GPIO.output(self.M0, GPIO.LOW)
@@ -456,13 +456,13 @@ class LoRaHatDriver:
 
         if self.ser.is_open:
             print("Serial port is open, trying to write configuration.")
-            self.ser.write(config_command)
+            self.ser.write(command_bytes)
             wait_counter = 0
             while True:
                 if self.ser.in_waiting > 0:  # there is something to read
                     time.sleep(0.1)
                     read_buffer = self.ser.read(self.ser.in_waiting)
-                    if read_buffer == answer_command:
+                    if read_buffer == answer_bytes:
                         print("Successfully applied configuration.")
                         # enter operation mode
                         GPIO.output(self.M1, GPIO.LOW)
