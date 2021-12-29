@@ -442,38 +442,8 @@ class LoRaHatDriver:
 
     def apply_config(self):
 
-        cfg_bytes = bytearray(12)
-        # set header
-        cfg_bytes[0] = CFG_HEADER
-        cfg_bytes[1] = START_REG
-        cfg_bytes[2] = NUM_REG
-        # set registers
-        cfg_bytes[3] = make_reg_00h_byte(self.module_address)
-        cfg_bytes[4] = make_reg_01h_byte(self.module_address)
-        cfg_bytes[5] = make_reg_02h_byte(self.net_id)
-        cfg_bytes[6] = make_reg_03h_byte(
-            self.baud_rate, self.parity_bit, self.air_speed
-        )
-        cfg_bytes[7] = make_reg_04h_byte(
-            self.packet_len, self.enable_ambient_noise, self.transmit_power
-        )
-        cfg_bytes[8] = make_reg_05h_byte(self.channel)
-        cfg_bytes[9] = make_reg_06h_byte(
-            self.enable_RSSI_byte,
-            self.enable_point_to_point_mode,
-            self.enable_relay_function,
-            self.enable_LBT,
-            self.WOR_mode,
-            self.WOR_period,
-        )
-        cfg_bytes[10] = make_reg_07h_byte(self.key)
-        cfg_bytes[11] = make_reg_08h_byte(self.key)
-
-        ret_bytes = cfg_bytes.copy()
-        ret_bytes[0] = RET_HEADER
-
-        cfg_bytes = bytes(cfg_bytes)
-        ret_bytes = bytes(ret_bytes)
+        config_command = serialize_config(self.config)
+        answer_command = RET_HEADER + config_command[1:]
 
         # enter configuration mode
         GPIO.output(self.M0, GPIO.LOW)
@@ -486,13 +456,13 @@ class LoRaHatDriver:
 
         if self.ser.is_open:
             print("Serial port is open, trying to write configuration.")
-            self.ser.write(cfg_bytes)
+            self.ser.write(config_command)
             wait_counter = 0
             while True:
                 if self.ser.in_waiting > 0:  # there is something to read
                     time.sleep(0.1)
                     read_buffer = self.ser.read(self.ser.in_waiting)
-                    if read_buffer == ret_bytes:
+                    if read_buffer == answer_command:
                         print("Successfully applied configuration.")
                         # enter operation mode
                         GPIO.output(self.M1, GPIO.LOW)
