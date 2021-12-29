@@ -1,13 +1,19 @@
+import logging
+import pprint
 import queue
 import threading
+import sys
 
 from loraconfig import lora_hat_config as config
 from driver import LoRaHatDriver
+
+logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
 q = queue.SimpleQueue()
 
 
 def print_received_data():
+    logging.debug(pprint.pformat(lora_hat.config))
     while True:
         print(q.get())
 
