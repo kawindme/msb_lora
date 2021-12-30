@@ -13,7 +13,7 @@ from driver import (
 )
 
 logging_basic_config = {
-    "filename": "",
+    # "filename": "",
     "stream": sys.stdout,
     "level": logging.DEBUG,
     "format": "%(levelname)s: %(asctime)s %(message)s",
