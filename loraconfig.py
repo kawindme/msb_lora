@@ -1,6 +1,5 @@
 import logging
 import os
-import sys
 
 from driver import (
     BaudRate,
@@ -14,8 +13,8 @@ from driver import (
 
 logging_basic_config = {
     # "filename": "",
-    "stream": sys.stdout,
-    "level": logging.DEBUG,
+    "stream": "sys.stdout",
+    "level": "logging.DEBUG",
     "format": "%(levelname)s: %(asctime)s %(message)s",
     "datefmt": "%Y%m%dT%H%M%S%z",
 }
