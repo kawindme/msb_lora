@@ -33,7 +33,7 @@ def write_to_zeromq(socket_name):
         print(topic, data)
 
 
-threading.Thread(target=write_to_zeromq, daemon=True).start()
+threading.Thread(target=write_to_zeromq, daemon=True, args=[socket_name]).start()
 
 with LoRaHatDriver(lora_hat_config) as lora_hat:
     logging.debug(f"LoRa hat config: {pprint.pformat(lora_hat.config)}")
