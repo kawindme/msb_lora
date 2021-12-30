@@ -36,6 +36,7 @@ lora_hat_config["enable_point_to_point_mode"] = True
 # (Partly) overwrite with localconfig
 try:
     import localconfig
+
     lora_hat_config.update(localconfig.lora_hat_config)
 except ImportError:
     pass

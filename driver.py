@@ -422,7 +422,7 @@ class LoRaHatDriver:
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.ser.close()
         GPIO.cleanup()
-        print("Successfully shut down.")
+        logging.info("Successfully shut down.")
 
     def apply_config(self):
 
@@ -436,10 +436,9 @@ class LoRaHatDriver:
 
         self.ser.open()
         self.ser.reset_input_buffer()
-        print("Press \033[1;32mCtrl+C\033[0m to exit")
 
         if self.ser.is_open:
-            print("Serial port is open, trying to write configuration.")
+            logging.info("Serial port is open, trying to write configuration.")
             self.ser.write(command_bytes)
             wait_counter = 0
             while True:
@@ -447,13 +446,13 @@ class LoRaHatDriver:
                     time.sleep(0.1)
                     read_buffer = self.ser.read(self.ser.in_waiting)
                     if read_buffer == answer_bytes:
-                        print("Successfully applied configuration.")
+                        logging.info("Successfully applied configuration.")
                         # enter operation mode
                         GPIO.output(self.M1, GPIO.LOW)
                         time.sleep(0.01)
                         break
                 elif wait_counter >= 100:
-                    print("Could not apply configuration. Aborting.")
+                    logging.info("Could not apply configuration. Aborting.")
                     break
                 else:
                     time.sleep(0.1)

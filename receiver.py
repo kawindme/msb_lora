@@ -21,4 +21,5 @@ threading.Thread(target=print_received_data, daemon=True).start()
 
 with LoRaHatDriver(config) as lora_hat:
     logging.debug(pprint.pformat(lora_hat.config))
+    print("Press \033[1;32mCtrl+C\033[0m to exit")
     lora_hat.receive(q)
