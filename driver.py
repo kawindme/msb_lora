@@ -459,7 +459,7 @@ class LoRaHatDriver:
                     wait_counter += 1
 
     def send(self, message: bytes):
-        #message = message + "\r\n".encode("utf-8")
+        # message = message + "\r\n".encode("utf-8")
 
         if self.enable_point_to_point_mode:
             # point to point -> requires prepended target address
