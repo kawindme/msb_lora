@@ -1,13 +1,14 @@
 import socket
 import time
 from loraconfig import lora_hat_config as config
-from loraconfig import logging_basic_config
+from loraconfig import logging_config
 from driver import LoRaHatDriver
 import logging
 import pprint
 import sys
 
-logging.basicConfig(**logging_basic_config)
+# logging.basicConfig(**logging_basic_config)
+logging.config.dictConfig(logging_config)
 
 
 hostname = socket.gethostname()

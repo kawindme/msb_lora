@@ -11,13 +11,45 @@ from driver import (
     WORPeriod,
 )
 
-logging_basic_config = {
-    # "filename": "",
-    "stream": "sys.stdout",
-    "level": "logging.DEBUG",
-    "format": "%(levelname)s: %(asctime)s %(message)s",
-    "datefmt": "%Y%m%dT%H%M%S%z",
+logging_config = {
+    "version": 1,
+    "disable_existing_loggers": True,
+    "loggers": {
+        "": {
+            "handlers": ["console", "file_handler"],
+            "level": "DEBUG",
+            "propagate": True,
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "level": "DEBUG",
+            "formatter": "standard",
+            "stream": "ext://sys.stdout",
+        },
+        "file_handler": {
+            "class": "logging.FileHandler",
+            "level": "DEBUG",
+            "formatter": "standard",
+            "filename": "mylogfile.log",
+        },
+    },
+    "formatters": {
+        "standard": {
+            "format": "%(levelname)s: %(asctime)s %(message)s",
+            "datefmt": "%Y%m%dT%H%M%S%z",
+        },
+    },
 }
+
+# logging_basic_config = {
+#     # "filename": "",
+#     "stream": "sys.stdout",
+#     "level": "logging.DEBUG",
+#     "format": "%(levelname)s: %(asctime)s %(message)s",
+#     "datefmt": "%Y%m%dT%H%M%S%z",
+# }
 
 lora_hat_default = {
     "module_address": 0,
