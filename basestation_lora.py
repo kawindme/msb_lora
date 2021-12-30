@@ -27,13 +27,15 @@ def write_to_zeromq(socket_name):
 
     while True:
         message = q.get()
-        topic_len = message[0]
-        topic = message[1:1+topic_len].decode("utf-8")
-        try:
-            data = pickle.loads(message[1+topic_len:])
-        except pickle.UnpicklingError:
-            logging.warning("Could not deserialize data.")
-        print(topic, data)
+        # topic_len = message[0]
+        # topic = message[1:1+topic_len].decode("utf-8")
+        # try:
+        #     data = pickle.loads(message[1+topic_len:])
+        # except pickle.UnpicklingError:
+        #     logging.warning("Could not deserialize data.")
+        #     continue
+        # print(topic, data)
+        print(message.decode("utf-8"))
 
 
 threading.Thread(target=write_to_zeromq, daemon=True, args=[socket_name]).start()

@@ -37,7 +37,8 @@ def read_from_zeromq(socket_name):
         _ = topic_bin.decode("utf-8")
         _ = pickle.loads(data_bin)
 
-        q.put((topic_bin, data_bin))
+        # q.put((topic_bin, data_bin))
+        q.put("Got zeroMQ message with topic: ".encode("utf-8") + topic_bin)
 
 
 threading.Thread(target=read_from_zeromq, daemon=True, args=[socket_name]).start()
@@ -45,9 +46,11 @@ threading.Thread(target=read_from_zeromq, daemon=True, args=[socket_name]).start
 with LoRaHatDriver(lora_hat_config) as lora_hat:
     logging.debug(f"LoRa hat config: {pprint.pformat(lora_hat.config)}")
     while True:
-        topic_bin, data_bin = q.get()
-
-        topic_len = len(topic_bin)
-        assert topic_len < 256
-
-        lora_hat.send(bytes([topic_len]) + topic_bin + data_bin)
+        # topic_bin, data_bin = q.get()
+        #
+        # topic_len = len(topic_bin)
+        # assert topic_len < 256
+        #
+        # lora_hat.send(bytes([topic_len]) + topic_bin + data_bin)
+        message = q.get()
+        lora_hat.send(message)
