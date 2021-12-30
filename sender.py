@@ -4,6 +4,7 @@ from loraconfig import lora_hat_config as config
 from loraconfig import logging_config
 from driver import LoRaHatDriver
 import logging
+import logging.config
 import pprint
 import sys
 
