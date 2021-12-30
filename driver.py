@@ -452,7 +452,7 @@ class LoRaHatDriver:
                         time.sleep(0.01)
                         break
                 elif wait_counter >= 100:
-                    logging.info("Could not apply configuration. Aborting.")
+                    logging.error("Could not apply configuration. Aborting.")
                     break
                 else:
                     time.sleep(0.1)

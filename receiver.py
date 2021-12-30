@@ -5,9 +5,10 @@ import threading
 import sys
 
 from loraconfig import lora_hat_config as config
+from loraconfig import logging_basic_config
 from driver import LoRaHatDriver
 
-logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
+logging.basicConfig(**logging_basic_config)
 
 q = queue.SimpleQueue()
 
