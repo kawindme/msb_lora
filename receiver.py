@@ -15,7 +15,7 @@ q = queue.SimpleQueue()
 
 def print_received_data():
     while True:
-        print(q.get())
+        print(q.get().decode("utf-8"))
 
 
 threading.Thread(target=print_received_data, daemon=True).start()

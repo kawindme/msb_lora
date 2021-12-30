@@ -17,6 +17,6 @@ with LoRaHatDriver(lora_hat_config) as lora_hat:
     print("Press \033[1;32mCtrl+C\033[0m to exit")
     while True:
         lora_hat.send(
-            f"{hostname} local time is: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}"
+            f"{hostname} local time is: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}\r\n".encode("utf-8")
         )
         time.sleep(2)

@@ -458,10 +458,9 @@ class LoRaHatDriver:
                     time.sleep(0.1)
                     wait_counter += 1
 
-    def send(self, message):
-        message = message + "\r\n"
-        # message = message + "\n"
-        bin_message = message.encode("utf-8")
+    def send(self, message: bytes):
+        #message = message + "\r\n".encode("utf-8")
+
         if self.enable_point_to_point_mode:
             # point to point -> requires prepended target address
             # When point to point transmitting, module will recognize the
@@ -476,9 +475,9 @@ class LoRaHatDriver:
             address_header[1] = make_reg_01h_byte(self.target_address)
             address_header[2] = make_reg_05h_byte(self.channel)
 
-            bin_message = bytes(address_header) + bin_message
+            message = bytes(address_header) + message
 
-        self.ser.write(bin_message)
+        self.ser.write(message)
 
     def receive(self, q):
         if self.module_address != 0xFFFF and self.enable_point_to_point_mode:
@@ -490,7 +489,7 @@ class LoRaHatDriver:
             if self.ser.in_waiting > 0:  # there is something to read
                 time.sleep(0.1)
                 read_buffer = self.ser.read(self.ser.in_waiting)
-                q.put(read_buffer.decode("utf-8"))
+                q.put(read_buffer)
 
     def read_config_from_hat(self):
         pass
