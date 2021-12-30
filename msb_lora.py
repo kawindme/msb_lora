@@ -14,7 +14,7 @@ logging.config.dictConfig(logging_config)
 
 q = queue.Queue()
 
-socket_name = "tcp://127.0.0.1:5555"
+socket_name = "tcp://127.0.0.1:5556"
 
 
 def read_from_zeromq(socket_name):

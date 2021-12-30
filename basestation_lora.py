@@ -13,7 +13,7 @@ from loraconfig import lora_hat_config, logging_config
 logging.config.dictConfig(logging_config)
 
 
-socket_name = "tcp://127.0.0.1:5556"
+socket_name = "tcp://127.0.0.1:5555"
 
 q = queue.Queue()
 
