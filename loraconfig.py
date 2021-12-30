@@ -1,4 +1,5 @@
 import logging
+import logging.config
 import os
 
 from driver import (
@@ -43,13 +44,7 @@ logging_config = {
     },
 }
 
-# logging_basic_config = {
-#     # "filename": "",
-#     "stream": "sys.stdout",
-#     "level": "logging.DEBUG",
-#     "format": "%(levelname)s: %(asctime)s %(message)s",
-#     "datefmt": "%Y%m%dT%H%M%S%z",
-# }
+logging.config.dictConfig(logging_config)
 
 lora_hat_default = {
     "module_address": 0,
