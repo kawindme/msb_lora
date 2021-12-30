@@ -33,7 +33,6 @@ def read_from_zeromq(socket_name):
 
     while True:
         topic_bin, data_bin = socket.recv_multipart()
-        print("received zeroMQ message")
         # make sure binary data is still deserializable
         _ = topic_bin.decode("utf-8")
         _ = pickle.loads(data_bin)
