@@ -3,6 +3,7 @@ import pprint
 import queue
 import sys
 import threading
+import time
 import zmq
 
 import logging.config
@@ -54,3 +55,6 @@ with LoRaHatDriver(lora_hat_config) as lora_hat:
         # lora_hat.send(bytes([topic_len]) + topic_bin + data_bin)
         message = q.get()
         lora_hat.send(message)
+        time.sleep(0.1)  # limit the number of messages send, otherwise receiver chokes
+        # discard messages that are more frequent, maybe use a Timer Thread that sends every x seconds?
+        # or does zeromq support this? do we need to read all from zeroMQ or is the last message enough?

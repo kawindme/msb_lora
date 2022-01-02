@@ -2,9 +2,10 @@
 # -*- coding: UTF-8 -*-
 
 # import RPi.GPIO as GPIO
+import logging
 import serial
 import time
-import logging
+
 
 from enum import Enum
 
@@ -475,7 +476,7 @@ class LoRaHatDriver:
             address_header[1] = make_reg_01h_byte(self.target_address)
             address_header[2] = make_reg_05h_byte(self.channel)
 
-            message = bytes(address_header) + message
+            self.ser.write(bytes(address_header) + message)
 
         self.ser.write(message)
 
