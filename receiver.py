@@ -18,7 +18,7 @@ q = queue.SimpleQueue()
 def print_received_data():
     while True:
         message = TextMessage.from_bytes(q.get())
-        print(message.topic.name, message.content)
+        print(f"{message.topic.name}: {message.content}")
 
 
 threading.Thread(target=print_received_data, daemon=True).start()
