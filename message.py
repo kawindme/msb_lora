@@ -4,15 +4,13 @@ import sys
 from abc import ABC, abstractmethod
 from enum import Enum, auto
 
-try:
-    import numpy as np
-except ImportError:
-    pass
+import numpy as np
 
 
 class Topic(Enum):
     UNDEFINED = auto()
     IMU = auto()
+    ATTITUDE = auto()
 
 
 # https://docs.python-guide.org/scenarios/serialization/
@@ -93,36 +91,46 @@ class PickleMessage(Message):
         return self.data
 
 
-if "numpy" in sys.modules:
+class NumpyMessage(Message):
 
-    class NumpyMessage(Message):
+    array_dtype = np.float32
 
-        array_dtype = np.float32
+    def __init__(self, array: np.ndarray, topic: Topic = Topic.UNDEFINED):
+        self.array = array
+        self.topic = topic
 
-        def __init__(self, array: np.ndarray, topic: Topic = Topic.UNDEFINED):
-            self.array = array
-            self.topic = topic
+        # array shape and dtype have to be known for deserialize
+        # assert: array is flat and dtype is self.array_dtype
+        if array.shape != (len(array),):
+            raise ValueError("array must be flat.")
+        if array.dtype != self.array_dtype:
+            raise ValueError(f"array must be of type {self.array_dtype}.")
 
-            # array shape and dtype have to be known for deserialize
-            # assert: array is flat and dtype is self.array_dtype
-            if array.shape != (len(array),):
-                raise ValueError("array must be flat.")
-            if array.dtype != self.array_dtype:
-                raise ValueError(f"array must be of type {self.array_dtype}.")
+    def _serialize(self):
+        return self.array.tobytes()
 
-        def _serialize(self):
-            return self.array.tobytes()
+    @classmethod
+    def _deserialize(cls, bytes_: bytes):
+        return np.frombuffer(bytes_, dtype=cls.array_dtype)
 
-        @classmethod
-        def _deserialize(cls, bytes_: bytes):
-            return np.frombuffer(bytes_, dtype=cls.array_dtype)
+    @property
+    def content(self):
+        return self.array
 
-        @property
-        def content(self):
-            return self.array
 
-else:
+class TimeOrientPosMessage(NumpyMessage):
+    def __init__(self, array: np.ndarray, topic: Topic = Topic.UNDEFINED):
+        assert len(array) == 8
+        super().__init__(array, topic)
 
-    class NumpyMessage:
-        def __init__(self):
-            raise RuntimeError("Missing dependency numpy.")
+    @property
+    def timestamp(self):
+        return self.array[0]
+
+    @property
+    def orientation(self):
+        return self.array[1:5]
+
+    @property
+    def position(self):
+        return self.array[5:8]
