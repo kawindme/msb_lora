@@ -36,7 +36,11 @@ def write_to_zeromq(socket_name):
         #     logging.warning("Could not deserialize data.")
         #     continue
         # print(topic, data)
-        print(PickleMessage.from_bytes(message))
+        try:
+            print(PickleMessage.from_bytes(message))
+        except Exception as e:
+            logging.error(e)
+
 
 
 threading.Thread(target=write_to_zeromq, daemon=True, args=[socket_name]).start()
