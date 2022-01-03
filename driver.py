@@ -476,7 +476,7 @@ class LoRaHatDriver:
             address_header[1] = make_reg_01h_byte(self.target_address)
             address_header[2] = make_reg_05h_byte(self.channel)
 
-            self.ser.write(bytes(address_header) + message)
+            message = bytes(address_header) + message
 
         self.ser.write(message)
 
