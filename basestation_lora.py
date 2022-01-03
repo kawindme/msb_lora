@@ -9,7 +9,7 @@ import logging.config
 
 from driver import LoRaHatDriver
 from loraconfig import lora_hat_config, logging_config
-from message import PickleMessage
+from message import TimeOrientPosMessage, DeserializeError
 
 logging.config.dictConfig(logging_config)
 
@@ -23,28 +23,20 @@ def write_to_zeromq(socket_name):
     logging.info(f"binding to {socket_name} for zeroMQ IPC")
     context = zmq.Context()
     socket = context.socket(zmq.PUB)
-    socket.connect(socket_name)
-    logging.info("connected to zeroMQ IPC socket")
+    with socket.connect(socket_name):
+        logging.info("connected to zeroMQ IPC socket")
 
-    while True:
-        message = q.get()
-        # topic_len = message[0]
-        # topic = message[1:1+topic_len].decode("utf-8")
-        # try:
-        #     data = pickle.loads(message[1+topic_len:])
-        # except pickle.UnpicklingError:
-        #     logging.warning("Could not deserialize data.")
-        #     continue
-        # print(topic, data)
-        try:
-            print(PickleMessage.from_bytes(message))
-        except Exception as e:
-            logging.error(e)
-
+        while True:
+            message = q.get()
+            try:
+                print(TimeOrientPosMessage.from_bytes(message))
+            except DeserializeError as e:
+                logging.error(e)
 
 
 threading.Thread(target=write_to_zeromq, daemon=True, args=[socket_name]).start()
 
 with LoRaHatDriver(lora_hat_config) as lora_hat:
     logging.debug(f"LoRa hat config: {pprint.pformat(lora_hat.config)}")
-    lora_hat.receive(q)
+    while True:
+        q.put(lora_hat.receive())

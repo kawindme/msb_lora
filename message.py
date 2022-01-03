@@ -16,6 +16,12 @@ class Topic(Enum):
 # https://docs.python-guide.org/scenarios/serialization/
 
 
+class DeserializeError(ValueError):
+    """Raised if a message could not be parsed."""
+
+    pass
+
+
 class Message(ABC):
 
     topic = Topic.UNDEFINED
@@ -50,7 +56,10 @@ class Message(ABC):
     @classmethod
     def from_bytes(cls, bytes_: bytes):
         topic = Topic(bytes_[0])
-        data = cls._deserialize(bytes_[1:])
+        try:
+            data = cls._deserialize(bytes_[1:])
+        except Exception as e:
+            raise DeserializeError() from e
         return cls(data, topic)
 
 
