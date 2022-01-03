@@ -480,7 +480,7 @@ class LoRaHatDriver:
 
         self.ser.write(message)
 
-    def receive(self, q):
+    def receive(self) -> bytes:
         if self.module_address != 0xFFFF and self.enable_point_to_point_mode:
             logging.warning(
                 "Module address is not set to 0xFFFF (broadcast address) and point to point mode is enabled. "
@@ -490,7 +490,7 @@ class LoRaHatDriver:
             if self.ser.in_waiting > 0:  # there is something to read
                 time.sleep(0.1)
                 read_buffer = self.ser.read(self.ser.in_waiting)
-                q.put(read_buffer)
+                return read_buffer
 
     def read_config_from_hat(self):
         pass
