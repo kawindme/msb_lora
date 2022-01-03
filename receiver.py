@@ -1,4 +1,5 @@
 import logging
+import logging.config
 import pprint
 import queue
 import threading
@@ -7,6 +8,7 @@ import sys
 from loraconfig import lora_hat_config
 from loraconfig import logging_config
 from driver import LoRaHatDriver
+from message import TextMessage
 
 logging.config.dictConfig(logging_config)
 
@@ -15,7 +17,8 @@ q = queue.SimpleQueue()
 
 def print_received_data():
     while True:
-        print(q.get().decode("utf-8"))
+        message = TextMessage.from_bytes(q.get())
+        print(str(message.topic), message.content)
 
 
 threading.Thread(target=print_received_data, daemon=True).start()

@@ -26,6 +26,11 @@ class Message(ABC):
     def __init__(self, *args, **kwargs):
         pass
 
+    @property
+    @abstractmethod
+    def content(self):
+        pass
+
     @abstractmethod
     def _serialize(self):
         pass
@@ -60,6 +65,10 @@ class TextMessage(Message):
     def _deserialize(cls, bytes_: bytes):
         return bytes_.decode("utf-8")
 
+    @property
+    def content(self):
+        return self.text
+
 
 class PickleMessage(Message):
     def __init__(self, data, topic: Topic = Topic.UNDEFINED):
@@ -75,6 +84,10 @@ class PickleMessage(Message):
     @classmethod
     def _deserialize(cls, bytes_: bytes):
         return pickle.loads(bytes_)
+
+    @property
+    def content(self):
+        return self.data
 
 
 if "numpy" in sys.modules:
@@ -92,9 +105,14 @@ if "numpy" in sys.modules:
 
         @classmethod
         def _deserialize(cls, bytes_: bytes):
-            return np.frombuffer(bytes_) # TODO: numpy dtype necessary for deserialize
+            return np.frombuffer(bytes_)  # TODO: numpy dtype necessary for deserialize
+
+        @property
+        def content(self):
+            return self.array
 
 else:
+
     class NumpyMessage:
         def __init__(self):
             raise RuntimeError("Missing dependency numpy.")
