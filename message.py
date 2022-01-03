@@ -96,16 +96,26 @@ class PickleMessage(Message):
 if "numpy" in sys.modules:
 
     class NumpyMessage(Message):
+
+        array_dtype = np.float32
+
         def __init__(self, array: np.ndarray, topic: Topic = Topic.UNDEFINED):
             self.array = array
             self.topic = topic
+
+            # array shape and dtype have to be known for deserialize
+            # assert: array is flat and dtype is self.array_dtype
+            if array.shape != (len(array),):
+                raise ValueError("array must be flat.")
+            if array.dtype != self.array_dtype:
+                raise ValueError(f"array must be of type {self.array_dtype}.")
 
         def _serialize(self):
             return self.array.tobytes()
 
         @classmethod
         def _deserialize(cls, bytes_: bytes):
-            return np.frombuffer(bytes_)  # TODO: numpy dtype necessary for deserialize
+            return np.frombuffer(bytes_, dtype=cls.array_dtype)
 
         @property
         def content(self):
