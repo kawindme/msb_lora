@@ -40,6 +40,12 @@ class Message(ABC):
     def _deserialize(cls, bytes_: bytes):
         pass
 
+    def __repr__(self):
+        return f"{self.__class__.__name__}({self.content}, {str(self.topic)})"
+
+    def __str__(self):
+        return f"{self.topic}: {self.content}"
+
     def serialize(self):
         return bytes([self.topic.value]) + self._serialize()
 
@@ -56,7 +62,7 @@ class TextMessage(Message):
         self.topic = topic
 
     def __repr__(self):
-        return f'{self.__class__.__name__}("{self.text}", {str(self.topic)})'
+        return f'{self.__class__.__name__}("{self.content}", {str(self.topic)})'
 
     def _serialize(self):
         return self.text.encode("utf-8")
@@ -74,9 +80,6 @@ class PickleMessage(Message):
     def __init__(self, data, topic: Topic = Topic.UNDEFINED):
         self.data = data
         self.topic = topic
-
-    def __repr__(self):
-        return f"{self.__class__.__name__}({str(self.data)}, {str(self.topic)})"
 
     def _serialize(self):
         return pickle.dumps(self.data)
@@ -96,9 +99,6 @@ if "numpy" in sys.modules:
         def __init__(self, array: np.ndarray, topic: Topic = Topic.UNDEFINED):
             self.array = array
             self.topic = topic
-
-        def __repr__(self):
-            return f"{self.__class__.__name__}({repr(self.array)}, {str(self.topic)})"
 
         def _serialize(self):
             return self.array.tobytes()
