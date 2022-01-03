@@ -35,7 +35,8 @@ def read_from_zeromq(socket_name):
 
     # skip all messages that piled up until now
     while True:
-        event_flag = socket.poll(timeout=10)
+        event_flag = socket.poll(timeout=0)
+        logging.debug(event_flag)
         if event_flag == 0:
             break
 
