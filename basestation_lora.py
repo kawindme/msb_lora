@@ -9,6 +9,7 @@ import logging.config
 
 from driver import LoRaHatDriver
 from loraconfig import lora_hat_config, logging_config
+from message import PickleMessage
 
 logging.config.dictConfig(logging_config)
 
@@ -35,7 +36,7 @@ def write_to_zeromq(socket_name):
         #     logging.warning("Could not deserialize data.")
         #     continue
         # print(topic, data)
-        print(message.decode("utf-8"))
+        print(PickleMessage.from_bytes(message))
 
 
 threading.Thread(target=write_to_zeromq, daemon=True, args=[socket_name]).start()
