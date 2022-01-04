@@ -414,7 +414,7 @@ class LoRaHatDriver:
         # create serial object but do not open file yet
         self.ser = serial.Serial()
         self.ser.port = "/dev/ttyS0"
-        self.ser.baudrate = int(self.baud_rate.name.split("_")[1])
+        self.ser.baudrate = 9600
 
     def __enter__(self):
         self.apply_config()
@@ -458,6 +458,10 @@ class LoRaHatDriver:
                 else:
                     time.sleep(0.1)
                     wait_counter += 1
+
+        # afterwards set the baudrate to the just configured
+        if self.baud_rate != BaudRate.BR_9600:
+            self.ser.baudrate = int(self.baud_rate.name.split("_")[1])
 
     def send(self, message: bytes):
         # message = message + "\r\n".encode("utf-8")
