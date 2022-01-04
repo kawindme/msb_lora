@@ -1,3 +1,5 @@
+import os
+
 import zmq
 import sys
 import logging
@@ -5,9 +7,13 @@ from logging.handlers import RotatingFileHandler
 
 from message import TimeOrientPosMessage
 
-file_name = "persist/persist_lora.txt"
+file_name = "persist_lora/persist_lora.txt"
 bytes_per_file = int(500 * 1000 * 1000)
 n_files = 20
+
+if not os.path.exists(file_name):
+    folder_path = os.path.dirname(file_name)
+    os.makedirs(folder_path, exist_ok=True)
 
 plain_formatter = logging.Formatter("%(message)s")
 
