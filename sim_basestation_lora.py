@@ -24,14 +24,5 @@ with socket.connect(socket_name):
         data = np.random.standard_normal(8).astype(TimeOrientPosMessage.array_dtype)
         sender = next(sender_iter)
         message = TimeOrientPosMessage(data, sender, topic=Topic.ATTITUDE)
-        socket.send_multipart(
-            [
-                "LORA".encode("utf-8"),  # topic
-                message.serialize()
-            ]
-        )
+        socket.send_multipart(["LORA".encode("utf-8"), message.serialize()])  # topic
         time.sleep(0.3)
-
-
-
-

@@ -5,9 +5,15 @@ from logging.handlers import RotatingFileHandler
 
 from message import TimeOrientPosMessage
 
+file_name = "persist/persist_lora.txt"
+bytes_per_file = int(500 * 1000 * 1000)
+n_files = 20
+
 plain_formatter = logging.Formatter("%(message)s")
 
-persist_handler = RotatingFileHandler("persist_lora.txt", maxBytes=500, backupCount=5, encoding="utf-8")
+persist_handler = RotatingFileHandler(
+    file_name, maxBytes=bytes_per_file, backupCount=n_files, encoding="utf-8"
+)
 persist_handler.setLevel("DEBUG")
 persist_handler.setFormatter(plain_formatter)
 
@@ -32,8 +38,3 @@ try:
 except Exception as e:
     logging.critical(f"failed to bind to zeromq socket: {e}")
     sys.exit(-1)
-
-
-
-
-
