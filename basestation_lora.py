@@ -16,7 +16,7 @@ logging.config.dictConfig(logging_config)
 
 socket_name = "tcp://127.0.0.1:5555"
 
-q = queue.Queue()
+q = queue.Queue(maxsize=3)
 
 
 def write_to_zeromq(socket_name):
@@ -39,4 +39,4 @@ threading.Thread(target=write_to_zeromq, daemon=True, args=[socket_name]).start(
 with LoRaHatDriver(lora_hat_config) as lora_hat:
     logging.debug(f"LoRa hat config: {pprint.pformat(lora_hat.config)}")
     while True:
-        q.put(lora_hat.receive())
+        q.put(lora_hat.receive(), block=False)
