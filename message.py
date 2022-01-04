@@ -47,7 +47,7 @@ class Message(ABC):
         pass
 
     def __repr__(self):
-        return f"{self.__class__.__name__}({self.content}, {str(self.topic)})"
+        return f"{self.__class__.__name__}({self.content}, {self.sender}, {str(self.topic)})"
 
     def __str__(self):
         return f"{self.topic}, from {self.sender}: {self.content}"
@@ -75,7 +75,7 @@ class Message(ABC):
 
 class TextMessage(Message):
     def __repr__(self):
-        return f'{self.__class__.__name__}("{self.content}", {str(self.topic)})'
+        return f'{self.__class__.__name__}("{self.content}", {self.sender}, {str(self.topic)})'
 
     def _serialize(self):
         return self.content.encode("utf-8")
