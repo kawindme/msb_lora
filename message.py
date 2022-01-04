@@ -63,7 +63,7 @@ class Message(ABC):
     def from_bytes(cls, bytes_: bytes):
         topic = Topic(bytes_[0])
         n_bytes_sender = np.dtype(cls._sender_dtype).itemsize
-        sender = np.frombuffer(bytes[1 : 1 + n_bytes_sender], dtype=cls._sender_dtype)
+        sender = np.frombuffer(bytes_[1 : 1 + n_bytes_sender], dtype=cls._sender_dtype)
         try:
             data = cls._deserialize(bytes_[1 + n_bytes_sender :])
         except Exception as e:
