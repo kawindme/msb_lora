@@ -6,11 +6,11 @@ import threading
 import sys
 
 from loraconfig import lora_hat_config
-from loraconfig import logging_config
+from loraconfig import logging_config_dict
 from driver import LoRaHatDriver
 from message import TextMessage
 
-logging.config.dictConfig(logging_config)
+logging.config.dictConfig(logging_config_dict)
 
 q = queue.SimpleQueue()
 

@@ -12,28 +12,41 @@ from driver import (
     WORPeriod,
 )
 
-logging_config = {
+# %% logging config
+log_config = {
+    "log_level": "DEBUG",
+    "log_file": "mylogfile.log",
+    "log_to_console": True,
+}
+
+_log_handlers = []
+if log_config.get("log_to_console", False):
+    _log_handlers.append("console")
+if log_config.get("log_file", ""):
+    _log_handlers.append("file_handler")
+
+logging_config_dict = {
     "version": 1,
     "disable_existing_loggers": True,
     "loggers": {
         "": {
-            "handlers": ["console", "file_handler"],
-            "level": "DEBUG",
+            "handlers": _log_handlers,
+            "level": log_config.get("log_level", "WARNING"),
             "propagate": True,
         },
     },
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
-            "level": "DEBUG",
+            "level": log_config.get("log_level", "WARNING"),
             "formatter": "standard",
             "stream": "ext://sys.stdout",
         },
         "file_handler": {
             "class": "logging.FileHandler",
-            "level": "DEBUG",
+            "level": log_config.get("log_level", "WARNING"),
             "formatter": "standard",
-            "filename": "mylogfile.log",
+            "filename": log_config.get("log_file", ""),
         },
     },
     "formatters": {
@@ -43,9 +56,9 @@ logging_config = {
         },
     },
 }
+logging.config.dictConfig(logging_config_dict)
 
-logging.config.dictConfig(logging_config)
-
+# %% lora hat config
 lora_hat_default = {
     "module_address": 0,
     "net_id": 0,

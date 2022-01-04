@@ -12,10 +12,10 @@ import numpy as np
 import logging.config
 
 from driver import LoRaHatDriver
-from loraconfig import lora_hat_config, logging_config
+from loraconfig import lora_hat_config, logging_config_dict
 from message import Topic, TimeOrientPosMessage
 
-logging.config.dictConfig(logging_config)
+logging.config.dictConfig(logging_config_dict)
 
 socket_name = "tcp://127.0.0.1:5556"
 seconds_between_messages = 1
