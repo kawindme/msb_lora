@@ -1,6 +1,7 @@
 import pickle
 import pprint
 from collections import deque
+from socket import gethostname
 import sys
 import threading
 import time
@@ -48,6 +49,7 @@ threading.Thread(target=read_from_zeromq, daemon=True, args=[socket_name]).start
 
 with LoRaHatDriver(lora_hat_config) as lora_hat:
     logging.debug(f"LoRa hat config: {pprint.pformat(lora_hat.config)}")
+    sender = int(gethostname()[4:8])
     while True:
         try:
             topic_bin, data_bin = buffer.pop()
@@ -59,11 +61,11 @@ with LoRaHatDriver(lora_hat_config) as lora_hat:
             data = np.random.standard_normal(8).astype(TimeOrientPosMessage.array_dtype)
 
             if topic == "imu":
-                message = TimeOrientPosMessage(data, topic=Topic.IMU)
+                message = TimeOrientPosMessage(data, sender, topic=Topic.IMU)
             elif topic == "attitude":
-                message = TimeOrientPosMessage(data, topic=Topic.ATTITUDE)
+                message = TimeOrientPosMessage(data, sender, topic=Topic.ATTITUDE)
             else:
-                message = TimeOrientPosMessage(data)
+                message = TimeOrientPosMessage(data, sender)
             lora_hat.send(message.serialize())
         except IndexError:
             logging.debug("No new data to send")

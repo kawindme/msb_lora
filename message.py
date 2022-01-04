@@ -25,14 +25,16 @@ class DeserializeError(ValueError):
 class Message(ABC):
 
     topic = Topic.UNDEFINED
+    _sender_dtype = np.ushort
 
-    @abstractmethod
-    def __init__(self, *args, **kwargs):
-        pass
+    def __init__(self, content, sender: int, topic: Topic = Topic.UNDEFINED):
+        self.content = self._check_content(content)
+        self.sender = sender
+        self.topic = topic
 
-    @property
+    @classmethod
     @abstractmethod
-    def content(self):
+    def _check_content(cls, content):
         pass
 
     @abstractmethod
@@ -48,98 +50,102 @@ class Message(ABC):
         return f"{self.__class__.__name__}({self.content}, {str(self.topic)})"
 
     def __str__(self):
-        return f"{self.topic}: {self.content}"
+        return f"{self.topic}, from {self.sender}: {self.content}"
 
     def serialize(self):
-        return bytes([self.topic.value]) + self._serialize()
+        return (
+            bytes([self.topic.value])
+            + np.array(self.sender, dtype=self._sender_dtype).tobytes()
+            + self._serialize()
+        )
 
     @classmethod
     def from_bytes(cls, bytes_: bytes):
         topic = Topic(bytes_[0])
+        n_bytes_sender = np.dtype(cls._sender_dtype).itemsize
+        sender = np.frombuffer(bytes[1 : 1 + n_bytes_sender], dtype=cls._sender_dtype)
         try:
-            data = cls._deserialize(bytes_[1:])
+            data = cls._deserialize(bytes_[1 + n_bytes_sender :])
         except Exception as e:
             raise DeserializeError() from e
-        return cls(data, topic)
+        return cls(data, sender, topic)
 
 
 class TextMessage(Message):
-    def __init__(self, text: str, topic: Topic = Topic.UNDEFINED):
-        self.text = text
-        self.topic = topic
-
     def __repr__(self):
         return f'{self.__class__.__name__}("{self.content}", {str(self.topic)})'
 
     def _serialize(self):
-        return self.text.encode("utf-8")
+        return self.content.encode("utf-8")
+
+    @classmethod
+    def _check_content(cls, content):
+        if type(content) != str:
+            raise TypeError(
+                f"{cls.__name__} expects a str content but got {type(content)}."
+            )
+        return content
 
     @classmethod
     def _deserialize(cls, bytes_: bytes):
         return bytes_.decode("utf-8")
 
-    @property
-    def content(self):
-        return self.text
-
 
 class PickleMessage(Message):
-    def __init__(self, data, topic: Topic = Topic.UNDEFINED):
-        self.data = data
-        self.topic = topic
-
     def _serialize(self):
-        return pickle.dumps(self.data)
+        return pickle.dumps(self.content)
+
+    @classmethod
+    def _check_content(cls, content):
+        return content
 
     @classmethod
     def _deserialize(cls, bytes_: bytes):
         return pickle.loads(bytes_)
-
-    @property
-    def content(self):
-        return self.data
 
 
 class NumpyMessage(Message):
 
     array_dtype = np.float32
 
-    def __init__(self, array: np.ndarray, topic: Topic = Topic.UNDEFINED):
-        self.array = array
-        self.topic = topic
-
-        # array shape and dtype have to be known for deserialize
-        # assert: array is flat and dtype is self.array_dtype
-        if array.shape != (len(array),):
+    @classmethod
+    def _check_content(cls, content):
+        if type(content) != np.ndarray:
+            raise TypeError(
+                f"{cls.__name__} expects a numpy array content but got {type(content)}."
+            )
+        if content.shape != (len(content),):
             raise ValueError("array must be flat.")
-        if array.dtype != self.array_dtype:
-            raise ValueError(f"array must be of type {self.array_dtype}.")
+        if content.dtype != cls.array_dtype:
+            raise ValueError(f"array must be of type {cls.array_dtype}.")
+        return content
 
     def _serialize(self):
-        return self.array.tobytes()
+        return self.content.tobytes()
 
     @classmethod
     def _deserialize(cls, bytes_: bytes):
         return np.frombuffer(bytes_, dtype=cls.array_dtype)
 
-    @property
-    def content(self):
-        return self.array
-
 
 class TimeOrientPosMessage(NumpyMessage):
-    def __init__(self, array: np.ndarray, topic: Topic = Topic.UNDEFINED):
-        assert len(array) == 8
-        super().__init__(array, topic)
+    @classmethod
+    def _check_content(cls, content):
+        content = super()._check_content(content)
+        if len(content) != 8:
+            raise ValueError(
+                f"{cls.__name__} expects an 8 element array as content but got len {len(content)}."
+            )
+        return content
 
     @property
     def timestamp(self):
-        return self.array[0]
+        return self.content[0]
 
     @property
     def orientation(self):
-        return self.array[1:5]
+        return self.content[1:5]
 
     @property
     def position(self):
-        return self.array[5:8]
+        return self.content[5:8]
