@@ -1,6 +1,7 @@
 import pickle
 import pprint
 from collections import deque
+from datetime import datetime
 from socket import gethostname
 import sys
 import threading
@@ -58,7 +59,9 @@ with LoRaHatDriver(lora_hat_config) as lora_hat:
             # data = pickle.loads(data_bin)
 
             # for debugging: create my own data for now
-            data = np.random.standard_normal(8).astype(TimeOrientPosMessage.array_dtype)
+            data = np.empty(8, dtype=TimeOrientPosMessage.array_dtype)
+            data[0] = datetime.utcnow().timestamp()
+            data[1:] = np.random.standard_normal(7)
 
             if topic == "imu":
                 message = TimeOrientPosMessage(data, sender, topic=Topic.IMU)
